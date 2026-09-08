@@ -1,0 +1,7 @@
+const CACHE='red-ridge-shell-v3';
+const ASSETS=['./','./index.html','./style.css','./app.js','./core.mjs','./cloud.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./figtree.woff2','./vendor/firebase-app.js','./vendor/firebase-auth.js','./vendor/firebase-firestore.js'];
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS))));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if((key.startsWith('daily-shell-')||key.startsWith('red-ridge-shell-'))&&key!==CACHE)await caches.delete(key);await self.clients.claim()})()));
+self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin)return;const allowed=ASSETS.map(path=>new URL(path,self.registration.scope).href);if(event.request.mode!=='navigate'&&!allowed.includes(url.href))return;
+ event.respondWith((async()=>{const cache=await caches.open(CACHE);if(event.request.mode==='navigate'){try{const response=await fetch(event.request);if(response.ok&&response.headers.get('content-type')?.includes('text/html')&&!response.redirected)return response;return (await cache.match('./index.html'))||response}catch{return (await cache.match('./index.html'))||Response.error()}}
+ return (await cache.match(event.request))||fetch(event.request)})());});
