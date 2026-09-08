@@ -47,3 +47,29 @@ strong,b{font-weight:500}
 [data-theme=light] .toast{background:#163b35;color:#fff}
 [data-theme=light] .toast button{color:#ffd49f}
 @media(max-width:680px){[data-theme=light] nav{background:#fff;border-color:#dbe5e1}}
+
+/* Compact page chrome and date-aware To-Do bands. */
+.nav-badge{position:absolute;top:18px;right:5px;display:grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border:2px solid var(--bg);border-radius:999px;background:#e54850;color:#fff;font-size:12px;line-height:1;font-weight:500;box-shadow:0 2px 7px #0005}
+.task-row{padding-left:32px;padding-right:32px;cursor:pointer;overflow:hidden}
+.task-row::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.05);opacity:0;pointer-events:none;transition:opacity 50ms linear}
+@media(hover:hover){.task-row:hover::after{opacity:1}}
+.task-label>span{white-space:pre-wrap}
+.done .task-row{filter:saturate(.5);opacity:.76}
+.todo-title{height:52px;min-height:52px;max-height:240px;resize:none;overflow-y:hidden}
+.field-hint{color:var(--muted);font-size:16px}
+main.todo-main{max-width:none;padding:0}
+.todo-main .workspace.single{max-width:none}
+.todo-main #list{width:100%}
+
+@media(min-width:681px){
+ .desktop-header{position:sticky;z-index:30;top:0;background:var(--bg)}
+ main{padding-top:32px}
+ .desktop-header>.add-button{flex:none}
+}
+
+@media(max-width:680px){
+ .desktop-header>.wordmark{display:none}
+ .desktop-header>.add-button{position:fixed;z-index:29;right:20px;bottom:calc(96px + env(safe-area-inset-bottom));width:58px;height:58px;box-shadow:0 8px 28px #07111899}
+ .nav-badge{top:4px;right:calc(50% - 30px);border-color:#142630}
+ [data-theme=light] .nav-badge{border-color:#fff}
+}
