@@ -50,10 +50,13 @@ strong,b{font-weight:500}
 
 /* Compact page chrome and date-aware To-Do bands. */
 .nav-badge{position:absolute;top:18px;right:5px;display:grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border:2px solid var(--bg);border-radius:999px;background:#e54850;color:#fff;font-size:12px;line-height:1;font-weight:500;box-shadow:0 2px 7px #0005}
-.task-row{padding-left:32px;padding-right:32px;cursor:pointer;overflow:hidden}
+.task-wrap{min-height:0}
+.task-row{min-height:0;padding:8px 24px;cursor:pointer;overflow:hidden}
 .task-row::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.05);opacity:0;pointer-events:none;transition:opacity 50ms linear}
 @media(hover:hover){.task-row:hover::after{opacity:1}}
+.task-label{font-size:14px}
 .task-label>span{white-space:pre-wrap}
+.task-label small{margin-top:3px;font-size:12px}
 .done .task-row{filter:saturate(.5);opacity:.76}
 .todo-title{height:52px;min-height:52px;max-height:240px;resize:none;overflow-y:hidden}
 .field-hint{color:var(--muted);font-size:16px}
