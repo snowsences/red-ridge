@@ -1,5 +1,5 @@
-const CACHE='red-ridge-shell-v7-cloudinary-8mb';
-const ASSETS=['./','./index.html','./style.css','./app.js','./core.mjs','./cloud.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./figtree.woff2','./vendor/firebase-app.js','./vendor/firebase-auth.js','./vendor/firebase-firestore.js'];
+const CACHE='red-ridge-shell-v8-fonts';
+const ASSETS=['./','./index.html','./style.css','./app.js','./core.mjs','./cloud.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./figtree-400.ttf','./figtree-500.ttf','./figtree-600.ttf','./figtree-700.ttf','./vendor/firebase-app.js','./vendor/firebase-auth.js','./vendor/firebase-firestore.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS))));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if((key.startsWith('daily-shell-')||key.startsWith('red-ridge-shell-'))&&key!==CACHE)await caches.delete(key);await self.clients.claim()})()));
 self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin)return;const allowed=ASSETS.map(path=>new URL(path,self.registration.scope).href);if(event.request.mode!=='navigate'&&!allowed.includes(url.href))return;
