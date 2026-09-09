@@ -1,0 +1,118 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(userId) {
+      return request.auth != null
+        && request.auth.uid == 'SRoia3s1D1gDnKvlCLlY4lBNMri1'
+        && userId == request.auth.uid;
+    }
+
+    function optionalString(data, field, maximum) {
+      return !(field in data)
+        || (data[field] is string && data[field].size() <= maximum);
+    }
+
+    function optionalBool(data, field) {
+      return !(field in data) || data[field] is bool;
+    }
+
+    function optionalNumber(data, field, minimum, maximum) {
+      return !(field in data)
+        || (data[field] is number
+          && data[field] >= minimum
+          && data[field] <= maximum);
+    }
+
+    function optionalList(data, field, maximum) {
+      return !(field in data)
+        || (data[field] is list && data[field].size() <= maximum);
+    }
+
+    function validCommon(data, recordId) {
+      return data.keys().size() <= 40
+        && data.id is string
+        && data.id == recordId
+        && recordId.matches('^[A-Za-z0-9_-]{1,128}$')
+        && data.type is string
+        && data.type in [
+          'recipe', 'ingredient', 'ingredientTag', 'note', 'car',
+          'todo', 'todoSchedule', 'maintenance', 'reminder'
+        ]
+        && data.createdAt is string
+        && data.createdAt.size() <= 40
+        && data.updatedAt is string
+        && data.updatedAt.size() <= 40
+        && optionalBool(data, 'deleted')
+        && optionalString(data, 'title', 300)
+        && optionalString(data, 'body', 20000)
+        && optionalString(data, 'date', 10)
+        && optionalString(data, 'ownedFrom', 10)
+        && optionalString(data, 'ownedTo', 10)
+        && optionalString(data, 'startDate', 10)
+        && optionalString(data, 'scheduledDate', 10)
+        && optionalString(data, 'cancelledOn', 10)
+        && optionalString(data, 'ingredients', 20000)
+        && optionalString(data, 'method', 20000)
+        && optionalString(data, 'substitutes', 10000)
+        && optionalString(data, 'category', 100)
+        && optionalString(data, 'year', 10)
+        && optionalString(data, 'make', 100)
+        && optionalString(data, 'model', 200)
+        && optionalString(data, 'owner', 200)
+        && optionalString(data, 'status', 20)
+        && optionalString(data, 'odometer', 30)
+        && optionalString(data, 'unit', 10)
+        && optionalString(data, 'vin', 100)
+        && optionalString(data, 'mileage', 30)
+        && optionalString(data, 'cost', 30)
+        && optionalString(data, 'provider', 200)
+        && optionalString(data, 'carId', 128)
+        && optionalString(data, 'scheduleId', 128)
+        && optionalString(data, 'coverPhotoId', 500)
+        && optionalBool(data, 'richText')
+        && optionalBool(data, 'pinned')
+        && optionalBool(data, 'hidden')
+        && optionalBool(data, 'done')
+        && optionalNumber(data, 'order', -1000000, 1000000)
+        && optionalNumber(data, 'intervalMonths', 1, 12)
+        && optionalList(data, 'photos', 100)
+        && optionalList(data, 'recipeIngredients', 200)
+        && optionalList(data, 'aliases', 100)
+        && optionalList(data, 'tagIds', 100);
+    }
+
+    function validRecord(data, recordId) {
+      return validCommon(data, recordId)
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 300;
+    }
+
+    function validLegacyPhoto(data, photoId) {
+      return data.keys().size() <= 6
+        && data.id is string
+        && data.id == photoId
+        && photoId.matches('^[A-Za-z0-9_-]{1,128}$')
+        && data.data is string
+        && data.data.size() <= 600000;
+    }
+
+    match /users/{userId}/dailyRecords/{recordId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && validRecord(request.resource.data, recordId);
+      allow update: if isOwner(userId)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.type == resource.data.type
+        && validRecord(request.resource.data, recordId);
+      allow delete: if isOwner(userId);
+    }
+
+    match /users/{userId}/dailyPhotos/{photoId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && validLegacyPhoto(request.resource.data, photoId);
+      allow delete: if isOwner(userId);
+    }
+  }
+}

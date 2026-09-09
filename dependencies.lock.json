@@ -1,0 +1,12 @@
+{
+  "firebase": {
+    "version": "12.18.0",
+    "source": "https://www.gstatic.com/firebasejs/12.18.0/",
+    "files": {
+      "vendor/firebase-app.js": "2fddac0600772c36b848b6b9651e52d00eb8f0a3656b5c24246cd8380b0e452a",
+      "vendor/firebase-auth.js": "69c3ab71e142b4e71bfa4f26e4ef0b8968518a41ce728e475fa8699f2f00117e",
+      "vendor/firebase-firestore.js": "6e9f1c96c2f09eed6c20760c69524a6d3cbed4826cb5baa1b21c41ffe894941e"
+    },
+    "note": "Auth and Firestore are official Google files with their Firebase app imports changed to ./firebase-app.js so they remain local."
+  }
+}
