@@ -54,28 +54,21 @@ strong,b{font-weight:500}
 .task-row{min-height:0;padding:12px 24px;cursor:pointer;overflow:hidden}
 .task-row::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.05);opacity:0;pointer-events:none;transition:opacity 50ms linear}
 @media (hover:hover){.task-row:hover::after{opacity:1}}
-.task-label{font-size:16px}
+.task-label{font-size:16px;font-weight:600;color:#fff}
 .task-label>span{white-space:pre-wrap}
-.task-label small{margin-top:3px;font-size:14px}
+.task-label small{margin:0 0 4px;font-size:14px;font-weight:400;color:#fff}
 .todo-web-link{position:relative;z-index:2;display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;margin-left:16px;border-radius:50%;color:#fff;background:#10232a2e;transition:background 50ms linear,transform 50ms linear}
 .todo-web-link .icon{width:22px;height:22px}
 .todo-web-link:hover{background:#10232a55;transform:scale(1.04)}
 .todo-web-link:focus-visible{outline:3px solid #fff;outline-offset:2px}
-.done .task-row{filter:saturate(.5);opacity:.76}
+.done.task-wrap,.done .task-row{background:transparent}
 .todo-title{height:52px;min-height:52px;max-height:240px;resize:none;overflow-y:hidden}
 .field-hint{color:var(--muted);font-size:16px}
 .recurring-check{margin-top:4px!important;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.recurring-toggle{border-top:1px solid var(--line)}
-.recurring-list{background:var(--surface)}
-.recurring-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 24px;border-bottom:1px solid var(--line)}
-.recurring-row>div{display:grid;gap:4px;min-width:0}
-.recurring-row strong{font-size:16px;overflow-wrap:anywhere}
-.recurring-row span{color:var(--muted);font-size:14px}
-.recurring-row button{flex:none}
 main.todo-main{max-width:none;padding:0}
 .task-wrap+.task-wrap{border-top:0}
 .task-row{color:#fff;background:linear-gradient(180deg,var(--band-top),var(--band-bottom))}
-.todo-main .workspace.single{max-width:none}
+.todo-main .workspace.single{width:min(100%,800px);max-width:800px;margin-left:auto;margin-right:auto}
 .todo-main #list{width:100%}
 
 @media (min-width:681px){
@@ -130,7 +123,29 @@ main[data-tab=cars] .section-label{grid-column:1/-1;background:none;border-top:1
 .photo-arrow.previous{left:16px}.photo-arrow.next{right:16px}
 .photo-position{margin:0;padding:14px 20px 18px;text-align:center;font-size:14px;color:#c6d1d8;flex:none}
 [data-theme=light] .photo-viewer{background:#111a21;color:#f5f8fa;border-color:#ffffff20}
-.task-label{font-weight:400}
+.completed-group{position:relative;overflow:hidden;background:var(--bg)}
+.completed-group>.task-list{position:relative;z-index:1}
+.completed-delete-all{position:absolute;z-index:0;top:0;right:0;bottom:0;width:116px;opacity:0}
+.completed-delete-all button{width:100%;height:100%;min-height:100%;padding:12px;background:#a94453;color:#fff;font-weight:500}
+.completed-group.delete-open .completed-delete-all,.completed-group.swiping-delete-all .completed-delete-all{opacity:1}
+.completed-group.delete-open .task-row{transform:translateX(-116px)}
+.completed-group .done .underlay.delete{display:none}
+.rich-field{margin:0 0 20px}
+.rich-field>label{display:block;margin:0 0 8px;font-weight:400}
+.rich-editor{width:100%;min-height:110px;max-height:320px;overflow:auto;border:1px solid #ffffff27;border-radius:7px;background:#162a35;color:#fff;padding:12px 14px;outline:none;white-space:pre-wrap}
+.rich-editor:focus{border-color:var(--accent)}
+.rich-editor ul,.rich-editor ol,.rich-reading ul,.rich-reading ol{margin:.45em 0 .45em 1.35em;padding-left:1.1em}
+.rich-editor li,.rich-reading li{margin:.2em 0}
+.rich-editor b,.rich-editor strong,.rich-reading b,.rich-reading strong{font-weight:600}
+.rich-reading{white-space:normal!important}
+[data-theme=light] .rich-editor{background:#fff;color:#18302b;border-color:#ccd8d3}
+.setting-card>h3{margin:4px 0 12px;font-size:16px;letter-spacing:0;color:var(--ink)}
+.setting-reminders{border-top:1px solid var(--line)}
+.setting-reminder{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.setting-reminder>div{display:grid;gap:3px;min-width:0}
+.setting-reminder strong{font-size:16px;font-weight:500;overflow-wrap:anywhere}
+.setting-reminder span{font-size:14px;color:var(--muted)}
+.setting-reminder button{flex:none;margin:0}
 @media (max-width:1000px){.car-content{padding:24px}}
 @media (max-width:680px){
  main[data-tab=cars] #list,main[data-tab=cars] .browsing #list{grid-template-columns:minmax(0,1fr);gap:20px}
