@@ -73,6 +73,8 @@ strong,b{font-weight:500}
 .recurring-row span{color:var(--muted);font-size:14px}
 .recurring-row button{flex:none}
 main.todo-main{max-width:none;padding:0}
+.task-wrap+.task-wrap{border-top:0}
+.task-row{color:#fff;background:linear-gradient(180deg,var(--band-top),var(--band-bottom))}
 .todo-main .workspace.single{max-width:none}
 .todo-main #list{width:100%}
 
