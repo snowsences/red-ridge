@@ -21,33 +21,6 @@ strong,b{font-weight:500}
  .sync-footer{margin:16px 0}
 }
 
-/* Estuary-inspired light palette. Strong journal bands keep their section colors. */
-[data-theme=light]{color-scheme:light;--bg:#f5f7f6;--surface:#fff;--muted:#5a746c;--ink:#142724;--accent:#d96f49;--line:#dbe5e1}
-[data-theme=light] body{background:#f5f7f6;color:#142724}
-[data-theme=light] .desktop-header{background:#f5f7f6}
-[data-theme=light] .account{background:#fff;border-color:#dbe5e1;color:#163b35}
-[data-theme=light] .search{background:#fff;border-color:#dbe5e1;color:#142724}
-[data-theme=light] .chip.active{background:#e7efec;color:#163b35}
-[data-theme=light] .section-label{background:#e7efec;color:#49675f;border-bottom:1px solid #dbe5e1}
-[data-theme=light] .detail,[data-theme=light] .empty{background:#fff;border:1px solid #dbe5e1;border-radius:15px}
-[data-theme=light] .setting-card{background:#fff;border-right:1px solid #dbe5e1;border-bottom:1px solid #dbe5e1;border-left:1px solid #dbe5e1;border-radius:15px;overflow:hidden}
-[data-theme=light] .primary{background:#d96f49;color:#142724}
-[data-theme=light] .add-button{background:#d96f49;color:#fff}
-[data-theme=light] .secondary{background:#163b35;color:#fff}
-[data-theme=light] .ghost{background:#fff;border:1px solid #dbe5e1;color:#163b35}
-[data-theme=light] .danger{background:#f7e6e6;color:#8b2e39}
-[data-theme=light] .gate{background:#f5f7f6}
-[data-theme=light] .gate .wordmark{color:#163b35}
-[data-theme=light] dialog{background:#fff;border-color:#dbe5e1;color:#142724}
-[data-theme=light] .form-body input:not([type=checkbox]),[data-theme=light] .form-body textarea,[data-theme=light] .form-body select,[data-theme=light] .setting-card textarea,[data-theme=light] .setting-card input{background:#fff;border-color:#cbd9d4;color:#142724}
-[data-theme=light] .form-actions{background:#f5f7f6;border-color:#dbe5e1}
-[data-theme=light] .setting-card pre{background:#edf2f0;color:#142724}
-[data-theme=light] .reminder{background:#f3f6f5}
-[data-theme=light] .completed-toggle{background:#e7efec;color:#49675f}
-[data-theme=light] .toast{background:#163b35;color:#fff}
-[data-theme=light] .toast button{color:#ffd49f}
-@media (max-width:680px){[data-theme=light] nav{background:#fff;border-color:#dbe5e1}}
-
 /* Compact page chrome and date-aware To-Do bands. */
 .nav-badge{position:absolute;top:18px;right:5px;display:grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border:2px solid var(--bg);border-radius:999px;background:#e54850;color:#fff;font-size:12px;line-height:1;font-weight:500;box-shadow:0 2px 7px #0005}
 .task-wrap{min-height:0}
@@ -88,7 +61,6 @@ main.todo-main{max-width:none;padding:0}
  .desktop-header>.wordmark{display:none}
  .desktop-header>.add-button{position:fixed;z-index:29;right:20px;bottom:calc(96px + env(safe-area-inset-bottom));width:58px;height:58px;box-shadow:0 8px 28px #07111899}
  .nav-badge{top:4px;right:calc(50% - 30px);border-color:#142630}
- [data-theme=light] .nav-badge{border-color:#fff}
 }
 
 /* Photo-led garage and uncluttered detail views. */
@@ -129,7 +101,6 @@ main[data-tab=cars] .section-label{grid-column:1/-1;background:none;border-top:1
 .photo-arrow{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:#101a22cc;color:#fff;font-size:28px;border:1px solid #ffffff40;backdrop-filter:blur(8px)}
 .photo-arrow.previous{left:16px}.photo-arrow.next{right:16px}
 .photo-position{margin:0;padding:14px 20px 18px;text-align:center;font-size:14px;color:#c6d1d8;flex:none}
-[data-theme=light] .photo-viewer{background:#111a21;color:#f5f8fa;border-color:#ffffff20}
 .completed-group{position:relative;overflow:hidden;background:var(--bg)}
 .completed-group>.task-list{position:relative;z-index:1}
 .completed-delete-all{position:absolute;z-index:0;top:0;right:0;bottom:0;width:116px;opacity:0}
@@ -145,7 +116,6 @@ main[data-tab=cars] .section-label{grid-column:1/-1;background:none;border-top:1
 .rich-editor li,.rich-reading li{margin:.2em 0}
 .rich-editor b,.rich-editor strong,.rich-reading b,.rich-reading strong{font-weight:600}
 .rich-reading{white-space:normal!important}
-[data-theme=light] .rich-editor{background:#fff;color:#18302b;border-color:#ccd8d3}
 .setting-card>h3{margin:4px 0 12px;font-size:16px;letter-spacing:0;color:var(--ink)}
 .setting-reminders{border-top:1px solid var(--line)}
 .setting-reminder{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
@@ -217,10 +187,6 @@ main[data-tab=recipes][data-food-view=ingredients] .workspace.browsing #list{wid
 .tag-manager-row{display:grid;grid-template-columns:1fr 48px;gap:8px;margin-bottom:9px}
 .tag-manager-row input{min-width:0}
 .tag-manager-row button{padding:0;min-height:48px}
-[data-theme=light] .food-tabs{background:#e7efec}
-[data-theme=light] .ingredient-card{border:1px solid #dbe5e1}
-[data-theme=light] .ingredient-tags span{background:#edf2f0}
-[data-theme=light] .ingredient-link{text-decoration-color:#163b3560}
 @media (max-width:1000px){.ingredient-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace.show-detail .ingredient-grid{grid-template-columns:1fr}.recipe-ingredient-row{grid-template-columns:32px 1fr 1.3fr 38px}.recipe-ingredient-row>label:last-of-type{grid-column:2/4}}
 @media (max-width:680px){
  .food-tabs{width:100%}.food-tabs .chip{flex:1}.manage-tags{margin-left:0}
@@ -230,3 +196,18 @@ main[data-tab=recipes][data-food-view=ingredients] .workspace.browsing #list{wid
  .recipe-ingredient-row{grid-template-columns:30px 1fr 38px;gap:8px}.recipe-ingredient-row>label{grid-column:2}.recipe-ingredient-row>.ingredient-drag{grid-column:1;grid-row:1}.recipe-ingredient-row>.ingredient-remove{grid-column:3;grid-row:1}.recipe-ingredient-row>label:last-of-type{grid-column:2}
  .recipe-ingredient-reading{grid-template-columns:72px 1fr}.recipe-ingredient-reading .ingredient-notes{grid-column:2}
 }
+
+/* Recipe cover photo: full content width without cropping. */
+main.recipe-detail .detail>.entry-content>.photos{margin-bottom:26px}
+main.recipe-detail .detail>.entry-content>.photos .photo-open:first-child{grid-column:1/-1;width:100%}
+main.recipe-detail .detail>.entry-content>.photos .photo-open:first-child img{display:block;width:100%;height:auto;object-fit:contain}
+
+/* Clickable photo inputs double as desktop drag-and-drop targets. */
+.form-body .photo-drop-zone{position:relative;display:flex!important;min-height:138px;align-items:center;justify-content:center;flex-direction:column;gap:5px;margin-bottom:12px;padding:22px;border:2px dashed #ffffff35;border-radius:10px;background:#162a3575;color:var(--ink);text-align:center;cursor:pointer;transition:border-color 140ms ease,background 140ms ease,transform 140ms ease}
+.photo-drop-zone input{position:absolute!important;width:1px!important;height:1px!important;min-height:1px!important;padding:0!important;opacity:0;pointer-events:none}
+.photo-drop-zone strong{font-weight:500}
+.photo-drop-zone>span:last-child{font-size:14px;color:var(--muted)}
+.photo-drop-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--accent);color:#17242d;font-size:26px;line-height:1}
+.photo-drop-zone.drag-over{border-color:var(--accent);background:#ffc44c15;transform:scale(1.01)}
+.photo-drop-zone.processing{opacity:.65;cursor:wait}
+.photo-drop-zone:focus-within{outline:3px solid #ffde91;outline-offset:3px}
