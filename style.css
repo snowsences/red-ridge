@@ -55,7 +55,14 @@ strong,b{font-weight:500}
 .task-row::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.05);opacity:0;pointer-events:none;transition:opacity 50ms linear}
 @media (hover:hover){.task-row:hover::after{opacity:1}}
 .task-label{font-size:16px;font-weight:600;color:#fff}
-.task-label>span{white-space:pre-wrap}
+.task-label>span{display:block;position:relative;white-space:pre-wrap}
+.task-label>span::after{content:attr(data-text);position:absolute;inset:0;color:transparent;text-decoration-line:line-through;text-decoration-color:#fff;text-decoration-thickness:1px;clip-path:inset(0 100% 0 0);pointer-events:none;white-space:pre-wrap}
+.done .task-label>span{text-decoration:none;opacity:.75}
+.done .task-label>span::after{clip-path:inset(0)}
+.task-label>span.strike-entering::after{animation:todo-strike-in 500ms cubic-bezier(.37,0,.63,1) both}
+.task-label>span.strike-leaving::after{animation:todo-strike-out 500ms cubic-bezier(.37,0,.63,1) both}
+@keyframes todo-strike-in{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+@keyframes todo-strike-out{from{clip-path:inset(0)}to{clip-path:inset(0 100% 0 0)}}
 .task-label small{margin:0 0 4px;font-size:14px;font-weight:400;color:#fff}
 .todo-web-link{position:relative;z-index:2;display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;margin-left:16px;border-radius:50%;color:#fff;background:#10232a2e;transition:background 50ms linear,transform 50ms linear}
 .todo-web-link .icon{width:22px;height:22px}
@@ -146,6 +153,7 @@ main[data-tab=cars] .section-label{grid-column:1/-1;background:none;border-top:1
 .setting-reminder strong{font-size:16px;font-weight:500;overflow-wrap:anywhere}
 .setting-reminder span{font-size:14px;color:var(--muted)}
 .setting-reminder button{flex:none;margin:0}
+@media (prefers-reduced-motion:reduce){.task-label>span.strike-entering::after,.task-label>span.strike-leaving::after{animation:none}.task-row{transition:none!important}}
 @media (max-width:1000px){.car-content{padding:24px}}
 @media (max-width:680px){
  main[data-tab=cars] #list,main[data-tab=cars] .browsing #list{grid-template-columns:minmax(0,1fr);gap:20px}
