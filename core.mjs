@@ -3,12 +3,7 @@ export const DEFAULT_CONFIG={"apiKey":"AIzaSyDWmZ9j59AtwlDwDs3h4Cnicpwr9GzUTIc",
 export const PALETTES={recipes:['#b95443','#bd5e46','#ba6845','#b57448','#af7b4b','#a78051'],notes:['#735295','#785792','#7e5c90','#83608b','#886586'],cars:['#365f90','#3a6b99','#3b759c','#3f7d9e','#46849e'],todos:['#05a58c','#00a7b5','#168ee8','#4f72e5','#7659dc','#a34bce','#d54aa8','#ed5d91']};
 export const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function linkify(text){const regex=/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>]+)/g;let out='',last=0;for(const m of String(text||'').matchAll(regex)){out+=escapeHTML(text.slice(last,m.index));let url=m[2]||m[3];let suffix='';if(!m[2]){const trim=url.match(/[.,!?;]+$/);if(trim){suffix=trim[0];url=url.slice(0,-suffix.length)}}out+=`<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(m[1]||url)}</a>${suffix}`;last=m.index+m[0].length}return out+escapeHTML(String(text||'').slice(last))}
-const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
-const bytes=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-async function derive(password,salt){const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:600000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
-export async function encryptNote(note,password){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const key=await derive(password,salt);const data=await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:new TextEncoder().encode('daily-note-v1')},key,new TextEncoder().encode(JSON.stringify(note)));return {version:1,salt:b64(salt),iv:b64(iv),ciphertext:b64(data)}}
-export async function decryptNote(payload,password){const key=await derive(password,bytes(payload.salt));const data=await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes(payload.iv),additionalData:new TextEncoder().encode('daily-note-v1')},key,bytes(payload.ciphertext));return JSON.parse(new TextDecoder().decode(data))}
-const types=['recipe','note','car','maintenance','reminder','todo','todoSchedule'];
+const types=['recipe','ingredient','ingredientTag','note','car','maintenance','reminder','todo','todoSchedule'];
 export function validateBackup(data){
   if(!['red-ridge','daily'].includes(data?.app)||data.version!==1||!Array.isArray(data.records)||!Array.isArray(data.photos))throw Error('Choose a Red Ridge backup (.json).');
   if(data.records.length>20000||data.photos.length>2000)throw Error('This backup is too large.');
@@ -17,6 +12,8 @@ export function validateBackup(data){
     if(!r||typeof r.id!=='string'||!/^[-\w]{1,100}$/.test(r.id)||ids.has(r.id)||!types.includes(r.type))throw Error('Invalid or duplicate entry in backup.');
     ids.add(r.id);
     if(r.type==='todoSchedule'&&!validSchedule(r))throw Error('Invalid recurring reminder.');
+    if(r.type==='recipe'&&r.recipeIngredients&&(!Array.isArray(r.recipeIngredients)||r.recipeIngredients.length>500||r.recipeIngredients.some(item=>!item||typeof item.id!=='string'||!/^[-\w]{1,100}$/.test(item.id)||typeof item.ingredientId!=='string'||!/^[-\w]{1,100}$/.test(item.ingredientId)||typeof item.amount!=='string'||item.amount.length>100||typeof item.notes!=='string'||item.notes.length>300)))throw Error('Invalid recipe ingredients.');
+    if(r.type==='ingredient'&&((r.tagIds&&!Array.isArray(r.tagIds))||(r.aliases&&!Array.isArray(r.aliases))||(r.tagIds?.some(id=>typeof id!=='string'||!/^[-\w]{1,100}$/.test(id)))||(r.aliases?.some(alias=>typeof alias!=='string'||alias.length>200))||typeof r.hidden!=='undefined'&&typeof r.hidden!=='boolean'||typeof r.substitutes!=='undefined'&&typeof r.substitutes!=='string'))throw Error('Invalid ingredient.');
     if(r.scheduleId&&(r.type!=='todo'||typeof r.scheduleId!=='string'||!/^[-\w]{1,70}$/.test(r.scheduleId)||!validTodoDate(r.scheduledDate)||r.id!==`repeat_${r.scheduleId}_${r.scheduledDate}`))throw Error('Invalid recurring To-Do.');
     if(JSON.stringify(r).length>100000||typeof r.title!=='string')throw Error('Invalid entry content.');
     if(r.encrypted&&(!r.payload||r.payload.version!==1||typeof r.payload.ciphertext!=='string'||r.title!==''||r.body))throw Error('Invalid encrypted note.');
@@ -35,6 +32,8 @@ export function validateBackup(data){
     if(r.scheduleId&&!data.records.some(s=>s.id===r.scheduleId&&s.type==='todoSchedule'))throw Error('A recurring reminder is missing from this backup.');
     if(r.photos?.some(photo=>typeof photo==='string'&&!pids.has(photo)))throw Error('A legacy photo is missing from this backup.');
     if(['maintenance','reminder'].includes(r.type)&&!data.records.some(c=>c.id===r.carId&&c.type==='car'))throw Error('A vehicle is missing from this backup.');
+    if(r.type==='recipe'&&r.recipeIngredients?.some(item=>!data.records.some(ingredient=>ingredient.id===item.ingredientId&&ingredient.type==='ingredient')))throw Error('A recipe ingredient is missing from this backup.');
+    if(r.type==='ingredient'&&r.tagIds?.some(tagId=>!data.records.some(tag=>tag.id===tagId&&tag.type==='ingredientTag')))throw Error('An ingredient tag is missing from this backup.');
   }
   return data;
 }
