@@ -211,3 +211,11 @@ main.recipe-detail .detail>.entry-content>.photos .photo-open:first-child img{di
 .photo-drop-zone.drag-over{border-color:var(--accent);background:#ffc44c15;transform:scale(1.01)}
 .photo-drop-zone.processing{opacity:.65;cursor:wait}
 .photo-drop-zone:focus-within{outline:3px solid #ffde91;outline-offset:3px}
+
+/* Compact Food and Notes list rows. */
+.band{min-height:0;padding:4px 16px}
+.band strong{font-size:18px}
+.band .meta{margin-top:2px}
+.band::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.05);opacity:0;pointer-events:none;transition:opacity 50ms linear}
+@media (hover:hover){.band:hover::after{opacity:1}}
+@media (max-width:680px){.band{min-height:0}}

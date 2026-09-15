@@ -1,9 +1,9 @@
 import {initializeApp} from './vendor/firebase-app.js';
-import {getAuth,setPersistence,browserLocalPersistence,browserSessionPersistence,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from './vendor/firebase-auth.js';
+import {getAuth,setPersistence,browserLocalPersistence,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from './vendor/firebase-auth.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,memoryLocalCache,collection,doc,onSnapshot,writeBatch,terminate,clearIndexedDbPersistence,waitForPendingWrites} from './vendor/firebase-firestore.js';
 import {OWNER} from './core.mjs';
 export async function connect(config,trusted,callbacks){
- const app=initializeApp(config,'red-ridge');const auth=getAuth(app);await setPersistence(auth,trusted?browserLocalPersistence:browserSessionPersistence);
+ const app=initializeApp(config,'red-ridge');const auth=getAuth(app);await setPersistence(auth,browserLocalPersistence);
  const db=initializeFirestore(app,{localCache:trusted?persistentLocalCache({tabManager:persistentMultipleTabManager()}):memoryLocalCache()});let stops=[];
  const col=name=>collection(db,'users',OWNER,name==='photos'?'dailyPhotos':'dailyRecords');
  const stop=()=>{stops.forEach(f=>f());stops=[]};
