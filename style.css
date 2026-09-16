@@ -220,8 +220,8 @@ main[data-tab=notes] .band{padding:16px 24px}
 .band::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.05);opacity:0;pointer-events:none;transition:opacity 50ms linear}
 @media (hover:hover){.band:hover::after{opacity:1}}
 @media (min-width:681px){
- .workspace.show-detail .detail{position:sticky;top:120px;max-height:calc(100dvh - 140px);overflow-y:auto;overscroll-behavior:contain}
- .workspace.show-detail .detail-actions{position:sticky;z-index:2;bottom:-1px;padding:18px 0 10px;background:#20323d;box-shadow:0 -16px 18px -18px #0009}
+ .workspace.show-detail .detail{position:sticky;top:120px;max-height:var(--detail-max-height,calc(100dvh - 164px));overflow-y:auto;overscroll-behavior:contain;scroll-padding-bottom:24px}
+ .workspace.show-detail .detail-actions{position:sticky;z-index:2;bottom:12px;padding:18px 0 10px;background:#20323d;box-shadow:0 -16px 18px -18px #0009}
 }
 
 /* Every present and future photo shimmers until the global load/error handler settles it. */
@@ -252,5 +252,6 @@ img.photo-load-error{background-color:#294653}
 
 /* Let the browser skip painting large Food and Cars collections below the viewport. */
 main[data-tab=recipes] #list .band{content-visibility:auto;contain-intrinsic-size:auto 76px}
+main[data-tab=recipes][data-food-view=recipes] #list .band{min-height:74px}
 main[data-tab=recipes] #list .ingredient-card{content-visibility:auto;contain-intrinsic-size:auto 300px}
 main[data-tab=cars] #list .car-card{content-visibility:auto;contain-intrinsic-size:auto 360px}
