@@ -4,6 +4,16 @@ export const PALETTES={recipes:['#b95443','#bd5e46','#ba6845','#b57448','#af7b4b
 export const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function linkify(text){const regex=/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>]+)/g;let out='',last=0;for(const m of String(text||'').matchAll(regex)){out+=escapeHTML(text.slice(last,m.index));let url=m[2]||m[3];let suffix='';if(!m[2]){const trim=url.match(/[.,!?;]+$/);if(trim){suffix=trim[0];url=url.slice(0,-suffix.length)}}out+=`<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(m[1]||url)}</a>${suffix}`;last=m.index+m[0].length}return out+escapeHTML(String(text||'').slice(last))}
 const types=['recipe','ingredient','ingredientTag','note','car','maintenance','reminder','todo','todoSchedule'];
+const noteHubIds={homeManual:'note_hub_home_manual',packing:'note_hub_packing',photography:'note_hub_photography'};
+const validCloudinaryPhoto=photo=>typeof photo==='string'||!!photo&&typeof photo.id==='string'&&/^[-\w]{1,100}$/.test(photo.id)&&typeof photo.url==='string'&&/^https:\/\/res\.cloudinary\.com\/[A-Za-z0-9_-]+\/image\/upload\//.test(photo.url)&&typeof photo.publicId==='string'&&photo.publicId.length<=500;
+function validHubRecord(r){
+ if(!r.noteKind)return true;
+ if(!noteHubIds[r.noteKind]||r.id!==noteHubIds[r.noteKind])return false;
+ const arrays=r.noteKind==='homeManual'?['homeItems','homeHistory','homeContacts']:r.noteKind==='packing'?['packingPacks','packingTrips']:['photoGuides'];
+ if(arrays.some(key=>!Array.isArray(r[key])||r[key].length>1000))return false;
+ const nested=[...(r.homeItems||[]),...(r.photoGuides||[])];
+ return nested.every(item=>item&&typeof item.id==='string'&&/^[-\w]{1,100}$/.test(item.id)&&typeof item.title==='string'&&item.title.length<=1000&&(!item.photos||Array.isArray(item.photos)&&item.photos.length<=100&&item.photos.every(validCloudinaryPhoto)));
+}
 export function validateBackup(data){
   if(!['red-ridge','daily'].includes(data?.app)||data.version!==1||!Array.isArray(data.records)||!Array.isArray(data.photos))throw Error('Choose a Red Ridge backup (.json).');
   if(data.records.length>20000||data.photos.length>2000)throw Error('This backup is too large.');
@@ -15,12 +25,12 @@ export function validateBackup(data){
     if(r.type==='recipe'&&r.recipeIngredients&&(!Array.isArray(r.recipeIngredients)||r.recipeIngredients.length>500||r.recipeIngredients.some(item=>!item||typeof item.id!=='string'||!/^[-\w]{1,100}$/.test(item.id)||typeof item.ingredientId!=='string'||!/^[-\w]{1,100}$/.test(item.ingredientId)||typeof item.amount!=='string'||item.amount.length>100||typeof item.notes!=='string'||item.notes.length>300)))throw Error('Invalid recipe ingredients.');
     if(r.type==='ingredient'&&((r.tagIds&&!Array.isArray(r.tagIds))||(r.aliases&&!Array.isArray(r.aliases))||(r.tagIds?.some(id=>typeof id!=='string'||!/^[-\w]{1,100}$/.test(id)))||(r.aliases?.some(alias=>typeof alias!=='string'||alias.length>200))||typeof r.hidden!=='undefined'&&typeof r.hidden!=='boolean'||typeof r.substitutes!=='undefined'&&typeof r.substitutes!=='string'))throw Error('Invalid ingredient.');
     if(r.scheduleId&&(r.type!=='todo'||typeof r.scheduleId!=='string'||!/^[-\w]{1,70}$/.test(r.scheduleId)||!validTodoDate(r.scheduledDate)||r.id!==`repeat_${r.scheduleId}_${r.scheduledDate}`))throw Error('Invalid recurring To-Do.');
-    if(JSON.stringify(r).length>100000||typeof r.title!=='string')throw Error('Invalid entry content.');
+    if(JSON.stringify(r).length>(r.type==='note'&&r.noteKind?900000:100000)||typeof r.title!=='string'||r.type==='note'&&!validHubRecord(r))throw Error('Invalid entry content.');
     if(r.encrypted&&(!r.payload||r.payload.version!==1||typeof r.payload.ciphertext!=='string'||r.title!==''||r.body))throw Error('Invalid encrypted note.');
     if(r.photos&&!Array.isArray(r.photos))throw Error('Invalid photos.');
     for(const photo of r.photos||[]){
       if(typeof photo==='string')continue;
-      if(!photo||typeof photo.id!=='string'||!/^[-\w]{1,100}$/.test(photo.id)||typeof photo.url!=='string'||!/^https:\/\/res\.cloudinary\.com\/[A-Za-z0-9_-]+\/image\/upload\//.test(photo.url)||typeof photo.publicId!=='string'||photo.publicId.length>500)throw Error('Invalid Cloudinary photo reference.');
+      if(!validCloudinaryPhoto(photo))throw Error('Invalid Cloudinary photo reference.');
     }
   }
   const pids=new Set();
@@ -75,7 +85,7 @@ export function recurringTodos(records,asOf=localDate()){
    const date=monthlyDate(schedule.startDate,index*schedule.intervalMonths);if(!date||date>cutoff)break;
    const id=`repeat_${schedule.id}_${date}`;if(existing.has(id))continue;
    const stamp=shiftDate(date,-7)+'T12:00:00.000Z';
-   result.push({id,type:'todo',title:schedule.title,date,done:false,scheduleId:schedule.id,scheduledDate:date,createdAt:stamp,updatedAt:stamp,order:(Number(schedule.order)||0)+index/10000});
+   result.push({id,type:'todo',title:schedule.title,date,done:false,scheduleId:schedule.id,scheduledDate:date,sourceHubId:schedule.sourceHubId||'',sourceItemId:schedule.sourceItemId||'',sourceLabel:schedule.sourceLabel||'',createdAt:stamp,updatedAt:stamp,order:(Number(schedule.order)||0)+index/10000});
   }
  }
  return result;
