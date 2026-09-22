@@ -160,7 +160,6 @@ main[data-tab=recipes][data-food-view=ingredients] .workspace.browsing #list{wid
 .detail.ingredient-detail{padding:0;overflow:hidden;border-radius:12px}
 .ingredient-hero{display:grid;width:100%;min-height:0;aspect-ratio:4/3;padding:0;place-items:center;background:#294653;color:#b8ccd6;overflow:hidden}
 .ingredient-hero img{display:block;width:100%;height:100%;object-fit:cover}
-.ingredient-hero-wrap{background:#172832}.ingredient-photo-credit{margin:0;padding:9px 14px;color:var(--muted);font-size:12px;line-height:1.35}.ingredient-photo-credit a{text-decoration:underline;text-decoration-color:#ffffff55}
 .ingredient-content{padding:28px 30px 30px}
 .ingredient-tags{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 24px!important}
 .ingredient-tags span{display:inline-flex;padding:5px 10px;border-radius:999px;background:#ffffff10;color:var(--ink);font-size:14px}
@@ -188,7 +187,7 @@ main[data-tab=recipes][data-food-view=ingredients] .workspace.browsing #list{wid
 .tag-manager-row{display:grid;grid-template-columns:1fr 48px;gap:8px;margin-bottom:9px}
 .tag-manager-row input{min-width:0}
 .tag-manager-row button{padding:0;min-height:48px}
-.ingredient-photo-search{margin:18px 0 22px;padding:16px;border:1px solid var(--line);border-radius:10px;background:#162a3575}.ingredient-photo-search-head{display:flex;align-items:center;justify-content:space-between;gap:14px}.ingredient-photo-search-head>div{display:grid;gap:2px}.ingredient-photo-search-head strong{font-weight:500}.ingredient-photo-search-head span{color:var(--muted);font-size:14px}.ingredient-photo-query{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:14px}.ingredient-photo-query input{min-width:0}.ingredient-photo-search-status{min-height:21px;margin:10px 0 0}.ingredient-photo-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}.ingredient-photo-option{display:grid;grid-template-rows:130px auto;min-width:0;overflow:hidden;padding:0;border:2px solid transparent;border-radius:8px;background:#203640;color:var(--ink);text-align:left}.ingredient-photo-option.selected{border-color:var(--accent)}.ingredient-photo-option img{width:100%;height:100%;object-fit:cover}.ingredient-photo-option>span{display:grid;gap:3px;padding:10px}.ingredient-photo-option strong{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ingredient-photo-option small{display:block;color:var(--muted);font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ingredient-photo-drop{border:2px dashed #ffffff25;transition:border-color 140ms ease,background 140ms ease,color 140ms ease}.ingredient-photo-drop.drag-over{border-color:var(--accent);background:#ffc44c20;color:#fff}.ingredient-photo-drop.uploading{border-color:#ffffff35;background:#ffffff0a;color:#fff;cursor:wait}
 @media (max-width:1000px){.ingredient-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace.show-detail .ingredient-grid{grid-template-columns:1fr}.recipe-ingredient-row{grid-template-columns:32px 1fr 1.3fr 38px}.recipe-ingredient-row>label:last-of-type{grid-column:2/4}}
 @media (max-width:680px){
  .food-tabs{width:100%}.food-tabs .chip{flex:1}.manage-tags{margin-left:0}
@@ -197,7 +196,6 @@ main[data-tab=recipes][data-food-view=ingredients] .workspace.browsing #list{wid
  .detail.ingredient-detail{border-radius:0}.ingredient-content{padding:20px 24px 28px}
  .recipe-ingredient-row{grid-template-columns:30px 1fr 38px;gap:8px}.recipe-ingredient-row>label{grid-column:2}.recipe-ingredient-row>.ingredient-drag{grid-column:1;grid-row:1}.recipe-ingredient-row>.ingredient-remove{grid-column:3;grid-row:1}.recipe-ingredient-row>label:last-of-type{grid-column:2}
  .recipe-ingredient-reading{grid-template-columns:72px 1fr}.recipe-ingredient-reading .ingredient-notes{grid-column:2}
- .ingredient-photo-search-head{align-items:stretch;flex-direction:column}.ingredient-photo-search-head button{width:100%}.ingredient-photo-query{grid-template-columns:1fr}.ingredient-photo-results{grid-template-columns:1fr 1fr}.ingredient-photo-option{grid-template-rows:105px auto}
 }
 
 /* Recipe cover photo: full content width without cropping. */
