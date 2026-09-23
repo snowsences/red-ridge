@@ -26,7 +26,6 @@ export function validateBackup(data){
     if(r.type==='ingredient'&&((r.tagIds&&!Array.isArray(r.tagIds))||(r.aliases&&!Array.isArray(r.aliases))||(r.tagIds?.some(id=>typeof id!=='string'||!/^[-\w]{1,100}$/.test(id)))||(r.aliases?.some(alias=>typeof alias!=='string'||alias.length>200))||typeof r.hidden!=='undefined'&&typeof r.hidden!=='boolean'||typeof r.substitutes!=='undefined'&&typeof r.substitutes!=='string'))throw Error('Invalid ingredient.');
     if(r.scheduleId&&(r.type!=='todo'||typeof r.scheduleId!=='string'||!/^[-\w]{1,70}$/.test(r.scheduleId)||!validTodoDate(r.scheduledDate)||r.id!==`repeat_${r.scheduleId}_${r.scheduledDate}`))throw Error('Invalid recurring To-Do.');
     if(JSON.stringify(r).length>(r.type==='note'&&r.noteKind?900000:100000)||typeof r.title!=='string'||r.type==='note'&&!validHubRecord(r))throw Error('Invalid entry content.');
-    if(r.encrypted&&(!r.payload||r.payload.version!==1||typeof r.payload.ciphertext!=='string'||r.title!==''||r.body))throw Error('Invalid encrypted note.');
     if(r.photos&&!Array.isArray(r.photos))throw Error('Invalid photos.');
     for(const photo of r.photos||[]){
       if(typeof photo==='string')continue;
@@ -38,12 +37,14 @@ export function validateBackup(data){
     if(!p||!/^[-\w]{1,100}$/.test(p.id)||pids.has(p.id)||typeof p.data!=='string'||!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(p.data)||p.data.length>600000)throw Error('Invalid legacy photo in backup.');
     pids.add(p.id);
   }
+  // Ids are unique by now, so one lookup table keeps the reference checks linear.
+  const typeById=new Map(data.records.map(r=>[r.id,r.type])),is=(id,type)=>typeById.get(id)===type;
   for(const r of data.records){
-    if(r.scheduleId&&!data.records.some(s=>s.id===r.scheduleId&&s.type==='todoSchedule'))throw Error('A recurring reminder is missing from this backup.');
+    if(r.scheduleId&&!is(r.scheduleId,'todoSchedule'))throw Error('A recurring reminder is missing from this backup.');
     if(r.photos?.some(photo=>typeof photo==='string'&&!pids.has(photo)))throw Error('A legacy photo is missing from this backup.');
-    if(['maintenance','reminder'].includes(r.type)&&!data.records.some(c=>c.id===r.carId&&c.type==='car'))throw Error('A vehicle is missing from this backup.');
-    if(r.type==='recipe'&&r.recipeIngredients?.some(item=>!data.records.some(ingredient=>ingredient.id===item.ingredientId&&ingredient.type==='ingredient')))throw Error('A recipe ingredient is missing from this backup.');
-    if(r.type==='ingredient'&&r.tagIds?.some(tagId=>!data.records.some(tag=>tag.id===tagId&&tag.type==='ingredientTag')))throw Error('An ingredient tag is missing from this backup.');
+    if(['maintenance','reminder'].includes(r.type)&&!is(r.carId,'car'))throw Error('A vehicle is missing from this backup.');
+    if(r.type==='recipe'&&r.recipeIngredients?.some(item=>!is(item.ingredientId,'ingredient')))throw Error('A recipe ingredient is missing from this backup.');
+    if(r.type==='ingredient'&&r.tagIds?.some(tagId=>!is(tagId,'ingredientTag')))throw Error('An ingredient tag is missing from this backup.');
   }
   return data;
 }
