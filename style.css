@@ -328,3 +328,18 @@ dialog::backdrop{opacity:0;transition:opacity var(--motion-out) ease,overlay var
 [data-transition^=photo] :is(#home,#add,nav,.nav-indicator,.detail){view-transition-name:none}.photo-viewer-stage img,.photo-viewer-stage img.photo-load-settled{background:none}
 @media (max-width:680px){#app.detail-open #add{display:none}}
 @media (max-width:680px){body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}nav{height:calc(60px + env(safe-area-inset-bottom));padding:2px 4px env(safe-area-inset-bottom)}.nav-tab{min-height:0;padding:5px 1px;gap:3px;font-size:10px;line-height:1.1}.nav-tab .icon{width:22px;height:22px}.desktop-header>.add-button,.page-head .add-button{bottom:calc(76px + env(safe-area-inset-bottom))}.toast{bottom:calc(74px + env(safe-area-inset-bottom))}}
+
+/* Compact typography. Main navigation and the To-Dos screen retain their established sizes. */
+body{font-size:14px}
+h1{font-size:clamp(36px,4vw,54px)}h2{font-size:28px}h3{font-size:20px}
+small,.small{font-size:14px}.wordmark{font-size:30px}.add-button{font-size:32px}
+.band strong{font-size:16px}.band .meta,.band .preview{font-size:14px}.date-square b{font-size:26px}.date-square span{font-size:14px}.chevron{font-size:26px}.section-label{font-size:14px}
+.detail h3{font-size:16px}.text-button{font-size:14px}.sync-footer{font-size:14px}.setting-card h2{font-size:22px}.setting-card pre{font-size:12px}.gate h1{font-size:46px}.modal-head h2{font-size:26px}
+main[data-tab=cars] .section-label{font-size:16px}.car-card-copy strong{font-size:22px}.photo-count{font-size:12px}.photo-viewer-toolbar .text-button{font-size:28px}.photo-arrow{font-size:26px}.photo-position{font-size:12px}
+.setting-card>h3{font-size:14px}.setting-reminder strong{font-size:14px}.setting-reminder span{font-size:12px}
+.ingredient-photo-placeholder{font-size:12px}.ingredient-card-copy strong{font-size:16px}.ingredient-card-copy span,.ingredient-tags span{font-size:12px}.ingredient-recipes strong{font-size:14px}.ingredient-amount,.ingredient-notes{font-size:12px}.recipe-ingredient-row label>span{font-size:11px}.ingredient-drag,.ingredient-remove{font-size:18px}.inline-ingredient-add{font-size:11px}
+.photo-drop-zone>span:last-child{font-size:12px}.photo-drop-icon{font-size:24px}.photo-error-retry{font-size:10px}.attachment-placeholder{font-size:11px}.attachment .attachment-retry,.attachment-status{font-size:10px}
+.note-type-choice strong{font-size:15px}.note-type-choice span{font-size:12px}.hub-tabs button span{font-size:10px}.hub-card h3{font-size:18px}.hub-kicker,.hub-photo-strip button>span{font-size:11px}.hub-facts dt{font-size:10px}.hub-links a,.hub-card-actions button,.hub-timeline time,.hub-section-preview span{font-size:12px}.photography-guide-content>h3{font-size:22px}
+.packing-template-remove{font-size:20px}.packing-trip-menu summary{font-size:18px}.packing-trip-row strong{font-size:14px}.packing-trip-row small{font-size:12px}.reminder button.reminder-done{font-size:13px}.ingredient-photo-drop[data-initial]::before{font-size:clamp(38px,7vw,62px)}
+.todo-main{font-size:16px}.todo-main h2{font-size:30px}.todo-main h3{font-size:22px}.todo-main small,.todo-main .small{font-size:16px}
+@media (max-width:680px){h1{font-size:40px}.gate h1{font-size:42px}.desktop-header .wordmark{font-size:26px}.ingredient-card-copy strong{font-size:14px}.ingredient-card-copy span{font-size:11px}}
