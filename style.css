@@ -267,7 +267,13 @@ main[data-tab=recipes] #list .band{content-visibility:auto;contain-intrinsic-siz
 main[data-tab=recipes][data-food-view=recipes] #list .band{min-height:74px}
 main[data-tab=recipes] #list .ingredient-card{content-visibility:auto;contain-intrinsic-size:auto 300px}
 main[data-tab=cars] #list .car-card{content-visibility:auto;contain-intrinsic-size:auto 360px}
-@media (max-width:680px){main:is([data-tab=recipes],[data-tab=notes]) .workspace{overflow-x:clip}main:is([data-tab=recipes],[data-tab=notes]) #list{touch-action:pan-y;will-change:transform}}
+@media (max-width:680px){
+ main:is([data-tab=recipes],[data-tab=notes]) .workspace{overflow-x:clip}
+ main:is([data-tab=recipes],[data-tab=notes]) #list{position:relative;min-height:50dvh;touch-action:pan-y}
+ main:is([data-tab=recipes],[data-tab=notes]) .category-page-current{position:relative;min-height:inherit;background:var(--bg)}
+ main:is([data-tab=recipes],[data-tab=notes]) .category-page-adjacent{position:absolute;z-index:3;top:0;left:0;width:100%;min-height:100%;background:var(--bg);pointer-events:none;will-change:transform}
+ main:is([data-tab=recipes],[data-tab=notes]) #list.category-paging{user-select:none}
+}
 
 /* Rich, single-instance reference notes. */
 .note-type-grid{display:grid;gap:10px}
