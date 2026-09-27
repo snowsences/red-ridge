@@ -1,5 +1,5 @@
-import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=80-todos-icon';
-const APP_BUILD='80-todos-icon';
+import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=81-share-fixes';
+const APP_BUILD='81-share-fixes';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 function photoErrorAction(image){const parent=image.parentElement;if(!parent||parent.querySelector(':scope > .photo-error-retry'))return;parent.classList.add('photo-error-host');const retry=document.createElement('span');retry.className='photo-error-retry';retry.tabIndex=0;retry.setAttribute('role','button');retry.textContent='Photo failed · Retry';const reload=event=>{event.preventDefault();event.stopPropagation();retry.remove();image.classList.remove('photo-load-settled','photo-load-error');const source=image.currentSrc||image.src;image.removeAttribute('src');requestAnimationFrame(()=>{image.src=source})};retry.addEventListener('click',reload);retry.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();reload(event)}});parent.append(retry)}
 function settlePhotoLoad(event){const image=event.target;if(!(image instanceof HTMLImageElement))return;if(event instanceof Event&&event.type==='load'&&!image.classList.contains('photo-load-settled')&&!reducedMotion()&&!inViewTransition())image.animate?.([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});image.classList.add('photo-load-settled');image.classList.toggle('photo-load-error',event.type==='error');if(event.type==='error')photoErrorAction(image);else{image.parentElement?.querySelector(':scope > .photo-error-retry')?.remove();image.parentElement?.classList.remove('photo-error-host')}}
@@ -94,7 +94,7 @@ let freshCategoryPage=false;
 function commitList(markup){const list=$('#list'),fresh=freshCategoryPage;freshCategoryPage=false;if(!categorySwipe||!list.hasPointerCapture?.(categorySwipe.pointerId)){const activePage=categoryPageRoot(list),adjacentPage=list.querySelector(':scope > .category-page-adjacent'),settling=(activePage!==list&&activePage.getAnimations?.().length)||adjacentPage?.getAnimations?.().length;if(!settling){if(activePage!==list){activePage.style.transform='';activePage.style.willChange=''}adjacentPage?.remove();list.classList.remove('category-paging');categorySwipe=null}}const output=usesCategoryPages()?`<div class="category-page-current">${markup}</div>`:markup,changed=output!==listMarkup;if(changed){const oldRoot=categoryPageRoot(list),animate=tab!=='todos'&&!!list.animate&&!document.hidden&&!reducedMotion()&&!inViewTransition()&&!!list.offsetParent&&oldRoot.children.length<=300,before=animate?(fresh?new Map():new Map([...oldRoot.children].map(node=>[node,node.getBoundingClientRect().top]))):null;const template=document.createElement('template');template.innerHTML=output;patchListChildren(list,template.content);listMarkup=output;if(before&&loaded)animateListChanges(categoryPageRoot(list),before)}syncSelectedListRow();return changed}
 // Legacy photos are ids into dailyPhotos, on the record itself or on reference items (home items, photo guides).
 const usesLegacyPhoto=r=>[r,...Object.values(r).flatMap(v=>Array.isArray(v)?v:[])].some(item=>Array.isArray(item?.photos)&&item.photos.some(photo=>typeof photo==='string'));
-async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=80-todos-icon');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
+async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=81-share-fixes');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
 async function signIn(){$('#signIn').disabled=true;try{const c=await initCloud();await c.signIn()}catch(err){$('#gateStatus').textContent=err.code==='auth/unauthorized-domain'?'Add snowsences.github.io to Firebase Authentication → Authorized domains.':`Sign-in did not finish. ${err.code||'Check your connection and try again.'}`}finally{$('#signIn').disabled=false}}
 $('#signIn').onclick=signIn;
 const opKey=op=>`${op.collection||'records'}:${op.id}`;
@@ -479,17 +479,26 @@ function richTextBlockLines(value,formatted){
  const template=document.createElement('template');
  template.innerHTML=sanitizeRichHTML(text);
  const lines=[];
- const push=(node,prefix)=>{const t=(node.textContent||'').replace(/\s+/g,' ').trim();if(t)lines.push(prefix+t)};
+ let buffer='',pendingPrefix='';
+ // pendingPrefix is consumed by the first non-empty flush after it's set, so a bullet/number
+ // lands on a list item's first sub-line even when an internal <br> splits it into several.
+ const flush=()=>{const t=buffer.replace(/\s+/g,' ').trim();buffer='';if(t){lines.push(pendingPrefix+t);pendingPrefix=''}};
+ // Loose text sitting directly under the root (a common contenteditable quirk for the first
+ // line typed) has no wrapping element, so it's tracked in `buffer` alongside <br>-separated
+ // runs within a paragraph, and only flushed to its own line at each block/break boundary.
  const walk=parent=>{
   for(const child of parent.childNodes){
+   if(child.nodeType===Node.TEXT_NODE){buffer+=child.data;continue}
    if(child.nodeType!==Node.ELEMENT_NODE)continue;
-   if(child.tagName==='UL')for(const li of child.children)push(li,'•  ');
-   else if(child.tagName==='OL')child.querySelectorAll(':scope > li').forEach((li,i)=>push(li,`${i+1}.  `));
-   else if(child.tagName==='P'||child.tagName==='DIV')push(child,'');
-   else walk(child);
+   if(child.tagName==='BR'){flush();continue}
+   if(child.tagName==='UL'){flush();for(const li of child.children){pendingPrefix='•  ';walk(li);flush()}continue}
+   if(child.tagName==='OL'){flush();[...child.children].forEach((li,i)=>{pendingPrefix=`${i+1}.  `;walk(li);flush()});continue}
+   if(child.tagName==='P'||child.tagName==='DIV'){flush();walk(child);flush();continue}
+   walk(child);
   }
  };
  walk(template.content);
+ flush();
  return lines.length?lines:[template.content.textContent.replace(/\s+/g,' ').trim()].filter(Boolean);
 }
 // Standard canvas word-wrap: greedily fills each line up to maxWidth, breaking on spaces.
@@ -533,12 +542,24 @@ async function buildRecipeShareImage(r){
   measure.font=font;
   const wrapped=lines.flatMap(l=>wrapCanvasText(measure,l,CW));
   const fontSize=parseInt(font.match(/(\d+)px/)[1]),lineHeight=Math.round(fontSize*1.45);
-  return {heading,lines:wrapped,lineHeight,height:44+wrapped.length*lineHeight+28};
+  return {heading,lines:wrapped,lineHeight,height:56+wrapped.length*lineHeight+28};
  };
  measure.font='700 56px Figtree';
  const titleLines=wrapCanvasText(measure,r.title,CW);
  const ingredientLineHeight=48;
- const ingredientsHeight=ingredientRows.length?44+ingredientRows.length*ingredientLineHeight+28:section('Ingredients',legacyIngredients,'400 32px Figtree').height;
+ measure.font='400 30px Figtree';
+ // Each row wraps "name, notes" as a hanging block indented past the amount column, with the
+ // amount's own width reserved so wrapped continuation lines still clear it.
+ const ingredientRowsWrapped=ingredientRows.map(row=>{
+  const amountText=row.amount?`${row.amount}  `:'';
+  const amountWidth=amountText?measure.measureText(amountText).width:0;
+  const fullText=row.notes?`${row.name}, ${row.notes}`:row.name;
+  const wrapped=wrapCanvasText(measure,fullText,CW-amountWidth);
+  const boundary=row.notes?row.name.length:fullText.length;
+  return {amountText,amountWidth,wrapped,boundary};
+ });
+ const ingredientTotalLines=ingredientRowsWrapped.reduce((n,row)=>n+row.wrapped.length,0);
+ const ingredientsHeight=ingredientRows.length?56+ingredientTotalLines*ingredientLineHeight+28:section('Ingredients',legacyIngredients,'400 32px Figtree').height;
  const methodSection=section('Method',methodLines,'400 32px Figtree');
  const notesSection=section('Notes',notesLines,'400 32px Figtree');
  let y=PAD;
@@ -578,11 +599,23 @@ async function buildRecipeShareImage(r){
  if(ingredientRows.length){
   heading('Ingredients');
   ctx.font='400 30px Figtree';
-  for(const row of ingredientRows){
-   cy+=ingredientLineHeight;
-   ctx.fillStyle='#b3c4ce';const amountText=row.amount?`${row.amount}  `:'';ctx.fillText(amountText,PAD,cy);
-   const amountWidth=amountText?ctx.measureText(amountText).width:0;
-   ctx.fillStyle='#f5f8fa';ctx.fillText(row.name,PAD+amountWidth,cy);
+  for(const row of ingredientRowsWrapped){
+   const x=PAD+row.amountWidth;
+   let consumed=0;
+   row.wrapped.forEach((line,i)=>{
+    cy+=ingredientLineHeight;
+    if(i===0&&row.amountText){ctx.fillStyle='#b3c4ce';ctx.fillText(row.amountText,PAD,cy)}
+    const lineStart=consumed,lineEnd=lineStart+line.length;
+    if(row.boundary>=lineEnd){ctx.fillStyle='#f5f8fa';ctx.fillText(line,x,cy)}
+    else if(row.boundary<=lineStart){ctx.fillStyle='#b3c4ce';ctx.fillText(line,x,cy)}
+    else{
+     const splitAt=row.boundary-lineStart,brightPart=line.slice(0,splitAt),quietPart=line.slice(splitAt);
+     ctx.fillStyle='#f5f8fa';ctx.fillText(brightPart,x,cy);
+     const brightWidth=ctx.measureText(brightPart).width;
+     ctx.fillStyle='#b3c4ce';ctx.fillText(quietPart,x+brightWidth,cy);
+    }
+    consumed=lineEnd+1;
+   });
   }
   cy+=28;
  }else if(legacyIngredients.length){
