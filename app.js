@@ -1,5 +1,5 @@
-import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=81-share-fixes';
-const APP_BUILD='81-share-fixes';
+import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=82-share-blank-lines';
+const APP_BUILD='82-share-blank-lines';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 function photoErrorAction(image){const parent=image.parentElement;if(!parent||parent.querySelector(':scope > .photo-error-retry'))return;parent.classList.add('photo-error-host');const retry=document.createElement('span');retry.className='photo-error-retry';retry.tabIndex=0;retry.setAttribute('role','button');retry.textContent='Photo failed · Retry';const reload=event=>{event.preventDefault();event.stopPropagation();retry.remove();image.classList.remove('photo-load-settled','photo-load-error');const source=image.currentSrc||image.src;image.removeAttribute('src');requestAnimationFrame(()=>{image.src=source})};retry.addEventListener('click',reload);retry.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();reload(event)}});parent.append(retry)}
 function settlePhotoLoad(event){const image=event.target;if(!(image instanceof HTMLImageElement))return;if(event instanceof Event&&event.type==='load'&&!image.classList.contains('photo-load-settled')&&!reducedMotion()&&!inViewTransition())image.animate?.([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});image.classList.add('photo-load-settled');image.classList.toggle('photo-load-error',event.type==='error');if(event.type==='error')photoErrorAction(image);else{image.parentElement?.querySelector(':scope > .photo-error-retry')?.remove();image.parentElement?.classList.remove('photo-error-host')}}
@@ -94,7 +94,7 @@ let freshCategoryPage=false;
 function commitList(markup){const list=$('#list'),fresh=freshCategoryPage;freshCategoryPage=false;if(!categorySwipe||!list.hasPointerCapture?.(categorySwipe.pointerId)){const activePage=categoryPageRoot(list),adjacentPage=list.querySelector(':scope > .category-page-adjacent'),settling=(activePage!==list&&activePage.getAnimations?.().length)||adjacentPage?.getAnimations?.().length;if(!settling){if(activePage!==list){activePage.style.transform='';activePage.style.willChange=''}adjacentPage?.remove();list.classList.remove('category-paging');categorySwipe=null}}const output=usesCategoryPages()?`<div class="category-page-current">${markup}</div>`:markup,changed=output!==listMarkup;if(changed){const oldRoot=categoryPageRoot(list),animate=tab!=='todos'&&!!list.animate&&!document.hidden&&!reducedMotion()&&!inViewTransition()&&!!list.offsetParent&&oldRoot.children.length<=300,before=animate?(fresh?new Map():new Map([...oldRoot.children].map(node=>[node,node.getBoundingClientRect().top]))):null;const template=document.createElement('template');template.innerHTML=output;patchListChildren(list,template.content);listMarkup=output;if(before&&loaded)animateListChanges(categoryPageRoot(list),before)}syncSelectedListRow();return changed}
 // Legacy photos are ids into dailyPhotos, on the record itself or on reference items (home items, photo guides).
 const usesLegacyPhoto=r=>[r,...Object.values(r).flatMap(v=>Array.isArray(v)?v:[])].some(item=>Array.isArray(item?.photos)&&item.photos.some(photo=>typeof photo==='string'));
-async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=81-share-fixes');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
+async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=82-share-blank-lines');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
 async function signIn(){$('#signIn').disabled=true;try{const c=await initCloud();await c.signIn()}catch(err){$('#gateStatus').textContent=err.code==='auth/unauthorized-domain'?'Add snowsences.github.io to Firebase Authentication → Authorized domains.':`Sign-in did not finish. ${err.code||'Check your connection and try again.'}`}finally{$('#signIn').disabled=false}}
 $('#signIn').onclick=signIn;
 const opKey=op=>`${op.collection||'records'}:${op.id}`;
@@ -472,10 +472,19 @@ function carCover(r){return entryCover(r)}
 function recipeCover(r){return entryCover(r)}
 // Flattens sanitized rich HTML into an array of plain lines, one per block/list item, with a
 // bullet or number prefix for list items, since canvas can only draw plain wrapped text.
+// A blank '' entry marks a paragraph gap (an extra Enter to separate paragraphs); callers draw
+// it as vertical space with no text. Leading/trailing/duplicate blanks are trimmed either way.
+function trimBlankLines(lines){
+ const out=[];
+ for(const l of lines)if(l!==''||(out.length&&out[out.length-1]!==''))out.push(l);
+ while(out.length&&out[0]==='')out.shift();
+ while(out.length&&out[out.length-1]==='')out.pop();
+ return out;
+}
 function richTextBlockLines(value,formatted){
  const text=String(value||'');
  if(!text.trim())return [];
- if(!formatted)return text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+ if(!formatted)return trimBlankLines(text.split(/\r?\n/).map(l=>l.trim()));
  const template=document.createElement('template');
  template.innerHTML=sanitizeRichHTML(text);
  const lines=[];
@@ -483,6 +492,7 @@ function richTextBlockLines(value,formatted){
  // pendingPrefix is consumed by the first non-empty flush after it's set, so a bullet/number
  // lands on a list item's first sub-line even when an internal <br> splits it into several.
  const flush=()=>{const t=buffer.replace(/\s+/g,' ').trim();buffer='';if(t){lines.push(pendingPrefix+t);pendingPrefix=''}};
+ const isEmptyBlock=el=>!(el.textContent||'').replace(/ /g,' ').trim();
  // Loose text sitting directly under the root (a common contenteditable quirk for the first
  // line typed) has no wrapping element, so it's tracked in `buffer` alongside <br>-separated
  // runs within a paragraph, and only flushed to its own line at each block/break boundary.
@@ -493,13 +503,15 @@ function richTextBlockLines(value,formatted){
    if(child.tagName==='BR'){flush();continue}
    if(child.tagName==='UL'){flush();for(const li of child.children){pendingPrefix='•  ';walk(li);flush()}continue}
    if(child.tagName==='OL'){flush();[...child.children].forEach((li,i)=>{pendingPrefix=`${i+1}.  `;walk(li);flush()});continue}
-   if(child.tagName==='P'||child.tagName==='DIV'){flush();walk(child);flush();continue}
+   // An empty <p>/<div> (just a stray <br> or nothing) is the paragraph-separating blank row a
+   // second Enter press creates; a non-empty one is walked as usual for its text.
+   if(child.tagName==='P'||child.tagName==='DIV'){flush();if(isEmptyBlock(child))lines.push('');else{walk(child);flush()}continue}
    walk(child);
   }
  };
  walk(template.content);
  flush();
- return lines.length?lines:[template.content.textContent.replace(/\s+/g,' ').trim()].filter(Boolean);
+ return lines.length?trimBlankLines(lines):[template.content.textContent.replace(/\s+/g,' ').trim()].filter(Boolean);
 }
 // Standard canvas word-wrap: greedily fills each line up to maxWidth, breaking on spaces.
 function wrapCanvasText(ctx,text,maxWidth){
@@ -540,7 +552,7 @@ async function buildRecipeShareImage(r){
  const section=(heading,lines,font)=>{
   if(!lines.length)return {lines:[],height:0};
   measure.font=font;
-  const wrapped=lines.flatMap(l=>wrapCanvasText(measure,l,CW));
+  const wrapped=lines.flatMap(l=>l===''?['']:wrapCanvasText(measure,l,CW));
   const fontSize=parseInt(font.match(/(\d+)px/)[1]),lineHeight=Math.round(fontSize*1.45);
   return {heading,lines:wrapped,lineHeight,height:56+wrapped.length*lineHeight+28};
  };
@@ -621,7 +633,7 @@ async function buildRecipeShareImage(r){
  }else if(legacyIngredients.length){
   heading('Ingredients');
   ctx.fillStyle='#f5f8fa';ctx.font='400 30px Figtree';
-  for(const line of legacyIngredients.flatMap(l=>wrapCanvasText(measure,l,CW))){cy+=44;ctx.fillText(line,PAD,cy)}
+  for(const line of legacyIngredients.flatMap(l=>l===''?['']:wrapCanvasText(measure,l,CW))){cy+=44;ctx.fillText(line,PAD,cy)}
   cy+=28;
  }
  if(methodSection.lines.length){
