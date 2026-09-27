@@ -1,11 +1,11 @@
-import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=78-nav-icon-18px';
-const APP_BUILD='78-nav-icon-18px';
+import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=79-recipe-share';
+const APP_BUILD='79-recipe-share';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 function photoErrorAction(image){const parent=image.parentElement;if(!parent||parent.querySelector(':scope > .photo-error-retry'))return;parent.classList.add('photo-error-host');const retry=document.createElement('span');retry.className='photo-error-retry';retry.tabIndex=0;retry.setAttribute('role','button');retry.textContent='Photo failed · Retry';const reload=event=>{event.preventDefault();event.stopPropagation();retry.remove();image.classList.remove('photo-load-settled','photo-load-error');const source=image.currentSrc||image.src;image.removeAttribute('src');requestAnimationFrame(()=>{image.src=source})};retry.addEventListener('click',reload);retry.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();reload(event)}});parent.append(retry)}
 function settlePhotoLoad(event){const image=event.target;if(!(image instanceof HTMLImageElement))return;if(event instanceof Event&&event.type==='load'&&!image.classList.contains('photo-load-settled')&&!reducedMotion()&&!inViewTransition())image.animate?.([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});image.classList.add('photo-load-settled');image.classList.toggle('photo-load-error',event.type==='error');if(event.type==='error')photoErrorAction(image);else{image.parentElement?.querySelector(':scope > .photo-error-retry')?.remove();image.parentElement?.classList.remove('photo-error-host')}}
 for(const eventName of ['load','error'])document.addEventListener(eventName,settlePhotoLoad,true);
 queueMicrotask(()=>document.querySelectorAll('img').forEach(image=>{if(image.complete)settlePhotoLoad({target:image,type:image.naturalWidth?'load':'error'})}));
-const icons={recipes:'<path d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1 0-4h13M8 7h7M8 11h5"/>',notes:'<path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5"/>',cars:'<path d="m4 10 2-6h12l2 6M3 10h18v8H3zM5 18v3M19 18v3M6 14h2M16 14h2"/>',todos:'<path d="m3 6 2 2 4-4M12 6h9M3 13l2 2 4-4M12 13h9M12 20h9M4 20h3"/>',settings:'<path d="M4 6h16M4 12h16M4 18h16M8 3v6M16 9v6M10 15v6"/>',check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',trash:'<path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6M10 11v6M14 11v6"/>',web:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>'};
+const icons={recipes:'<path d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1 0-4h13M8 7h7M8 11h5"/>',notes:'<path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5"/>',cars:'<path d="m4 10 2-6h12l2 6M3 10h18v8H3zM5 18v3M19 18v3M6 14h2M16 14h2"/>',todos:'<path d="m3 6 2 2 4-4M12 6h9M3 13l2 2 4-4M12 13h9M12 20h9M4 20h3"/>',settings:'<path d="M4 6h16M4 12h16M4 18h16M8 3v6M16 9v6M10 15v6"/>',check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',trash:'<path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6M10 11v6M14 11v6"/>',web:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>',share:'<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>'};
 const icon=n=>`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[n]}</svg>`;
 const NAV_ICONS={recipes:{viewBox:'0 0 22 22',outline:'<path d="M15.4 22C13.5667 22 12.0083 21.3583 10.725 20.075C9.44167 18.7917 8.8 17.2333 8.8 15.4C8.8 13.5667 9.44167 12.0083 10.725 10.725C12.0083 9.44167 13.5667 8.8 15.4 8.8C17.2333 8.8 18.7917 9.44167 20.075 10.725C21.3583 12.0083 22 13.5667 22 15.4C22 17.2333 21.3583 18.7917 20.075 20.075C18.7917 21.3583 17.2333 22 15.4 22ZM15.4 19.8C16.61 19.8 17.6458 19.3692 18.5075 18.5075C19.3692 17.6458 19.8 16.61 19.8 15.4C19.8 14.19 19.3692 13.1542 18.5075 12.2925C17.6458 11.4308 16.61 11 15.4 11C14.19 11 13.1542 11.4308 12.2925 12.2925C11.4308 13.1542 11 14.19 11 15.4C11 16.61 11.4308 17.6458 12.2925 18.5075C13.1542 19.3692 14.19 19.8 15.4 19.8ZM2.2 19.8C1.595 19.8 1.07727 19.5848 0.6468 19.1543C0.216333 18.7238 0.000733333 18.2057 0 17.6V9.24C0 9.09333 0.0139335 8.94667 0.0418001 8.8C0.0696668 8.65333 0.110733 8.50667 0.165 8.36L2.365 3.3H2.2C1.88833 3.3 1.62727 3.1944 1.4168 2.9832C1.20633 2.772 1.10073 2.51093 1.1 2.2V1.1C1.1 0.788333 1.2056 0.527267 1.4168 0.3168C1.628 0.106333 1.88907 0.000733333 2.2 0H9.9C10.2117 0 10.4731 0.1056 10.6843 0.3168C10.8955 0.528 11.0007 0.789067 11 1.1V2.2C11 2.51167 10.8944 2.7731 10.6832 2.9843C10.472 3.1955 10.2109 3.30073 9.9 3.3H9.735L11.55 7.48C11.2017 7.66333 10.8717 7.85583 10.56 8.0575C10.2483 8.25917 9.955 8.48833 9.68 8.745L7.37 3.3H4.73L2.2 9.24V17.6H6.875C6.96667 17.985 7.09023 18.3656 7.2457 18.7418C7.40117 19.118 7.58927 19.4707 7.81 19.8H2.2ZM15.4 7.7C14.63 7.7 13.9792 7.43417 13.4475 6.9025C12.9158 6.37083 12.65 5.72 12.65 4.95C12.65 4.18 12.9158 3.52917 13.4475 2.9975C13.9792 2.46583 14.63 2.2 15.4 2.2V7.7ZM15.4 7.7C15.4 6.93 15.6658 6.27917 16.1975 5.7475C16.7292 5.21583 17.38 4.95 18.15 4.95C18.92 4.95 19.5708 5.21583 20.1025 5.7475C20.6342 6.27917 20.9 6.93 20.9 7.7H15.4Z"/>',filled:'<path d="M2.2 19.8C1.595 19.8 1.07727 19.5848 0.6468 19.1543C0.216333 18.7238 0.000733333 18.2057 0 17.6V9.24C0 9.09333 0.0139335 8.94667 0.0418001 8.8C0.0696668 8.65333 0.110733 8.50667 0.165 8.36L2.365 3.3H2.2C1.88833 3.3 1.62727 3.1944 1.4168 2.9832C1.20633 2.772 1.10073 2.51093 1.1 2.2V1.1C1.1 0.788333 1.2056 0.527267 1.4168 0.3168C1.628 0.106333 1.88907 0.000733333 2.2 0H9.9C10.2117 0 10.4731 0.1056 10.6843 0.3168C10.8955 0.528 11.0007 0.789067 11 1.1V2.2C11 2.51167 10.8944 2.7731 10.6832 2.9843C10.472 3.1955 10.2109 3.30073 9.9 3.3H9.735L11.55 7.48C10.065 8.25 8.86417 9.32727 7.9475 10.7118C7.03083 12.0963 6.5725 13.6499 6.5725 15.3725C6.5725 16.1058 6.67333 16.8714 6.875 17.6693C7.07667 18.4672 7.38833 19.1774 7.81 19.8H2.2ZM15.4 22C13.5667 22 12.0083 21.3583 10.725 20.075C9.44167 18.7917 8.8 17.2333 8.8 15.4C8.8 13.5667 9.44167 12.0083 10.725 10.725C12.0083 9.44167 13.5667 8.8 15.4 8.8C17.2333 8.8 18.7917 9.44167 20.075 10.725C21.3583 12.0083 22 13.5667 22 15.4C22 17.2333 21.3583 18.7917 20.075 20.075C18.7917 21.3583 17.2333 22 15.4 22ZM15.4 7.7C14.63 7.7 13.9792 7.43417 13.4475 6.9025C12.9158 6.37083 12.65 5.72 12.65 4.95C12.65 4.18 12.9158 3.52917 13.4475 2.9975C13.9792 2.46583 14.63 2.2 15.4 2.2V7.7ZM15.4 7.7C15.4 6.93 15.6658 6.27917 16.1975 5.7475C16.7292 5.21583 17.38 4.95 18.15 4.95C18.92 4.95 19.5708 5.21583 20.1025 5.7475C20.6342 6.27917 20.9 6.93 20.9 7.7H15.4Z"/>'},notes:{viewBox:'0 0 20 20',outline:'<path d="M2.85714 2.14286C2.46429 2.14286 2.14286 2.46429 2.14286 2.85714V17.1429C2.14286 17.5357 2.46429 17.8571 2.85714 17.8571H12.8571V14.2857C12.8571 13.4955 13.4955 12.8571 14.2857 12.8571H17.8571V2.85714C17.8571 2.46429 17.5357 2.14286 17.1429 2.14286H2.85714ZM2.85714 20C1.28125 20 0 18.7187 0 17.1429V2.85714C0 1.28125 1.28125 0 2.85714 0H17.1429C18.7187 0 20 1.28125 20 2.85714V13.1027C20 13.8616 19.7009 14.5893 19.1652 15.125L15.125 19.1652C14.5893 19.7009 13.8616 20 13.1027 20H2.85714Z"/>',filled:'<path d="M2.85714 0C1.28125 0 0 1.28125 0 2.85714V17.1429C0 18.7187 1.28125 20 2.85714 20H12.8571V15C12.8571 13.817 13.817 12.8571 15 12.8571H20V2.85714C20 1.28125 18.7187 0 17.1429 0H2.85714ZM20 14.2857H15C14.6071 14.2857 14.2857 14.6071 14.2857 15V20L20 14.2857Z"/>'},cars:{viewBox:'0 0 21 18',outline:'<path d="M1.90909 14.2581H19.0909V8.19783H1.90909V14.2581ZM16.574 10.6934C16.5263 10.6936 16.4873 10.7333 16.4873 10.7824C16.4873 10.8315 16.5263 10.8712 16.574 10.8714C16.622 10.8714 16.6607 10.8316 16.6607 10.7824C16.6607 10.7456 16.6395 10.7137 16.6085 10.7001L16.574 10.6934ZM4.50519 10.7479C4.49642 10.7266 4.48028 10.7091 4.45952 10.7001L4.42596 10.6934C4.37803 10.6934 4.33927 10.7332 4.33927 10.7824L4.34579 10.8168C4.35893 10.8489 4.38996 10.8714 4.42596 10.8714C4.46178 10.8713 4.49207 10.8488 4.50519 10.8168L4.51265 10.7824L4.50519 10.7479ZM5.13627 1.96043C4.50927 1.96057 4.04166 2.30883 3.88064 2.69464L2.40221 6.2374H18.5978L17.1194 2.69464C16.9583 2.30882 16.4907 1.96057 15.8637 1.96043H5.13627ZM6.24836 10.7824C6.24836 11.8158 5.43224 12.6536 4.42596 12.6538C3.48247 12.6538 2.70626 11.9174 2.61288 10.9738L2.60356 10.7824L2.61288 10.5909C2.70626 9.64738 3.48247 8.91098 4.42596 8.91098L4.61239 8.92055C5.5311 9.01658 6.24836 9.81363 6.24836 10.7824ZM18.3964 10.7824C18.3964 11.8159 17.5805 12.6538 16.574 12.6538C15.5678 12.6536 14.7516 11.8158 14.7516 10.7824C14.7516 9.749 15.5678 8.91116 16.574 8.91098C17.5805 8.91098 18.3964 9.74888 18.3964 10.7824ZM21 17.0198C21 17.5611 20.5726 18 20.0455 18H18.3097C17.7826 17.9999 17.3552 17.5611 17.3552 17.0198V16.2186H3.6448V17.0198C3.6448 17.5611 3.21736 17.9999 2.69025 18H0.954545C0.427365 18 0 17.5611 0 17.0198V7.21761C4.58171e-05 7.08498 0.0264891 6.95376 0.0773704 6.83184L2.12629 1.92214C2.63235 0.709882 3.86436 0.000138821 5.13627 0H15.8637C17.1356 0.000138144 18.3677 0.709882 18.8737 1.92214L20.9226 6.83184C20.9735 6.95376 21 7.08498 21 7.21761V17.0198Z"/>',filled:'<path d="M20.9825 7.01887C20.97 6.95937 20.9517 6.90132 20.9278 6.84562L18.8617 1.88662C18.3854 0.740812 17.2266 0 15.908 0H5.09196C3.77454 0 2.61462 0.740812 2.13884 1.88662L0.0705546 6.84562C0.0235189 6.95748 -0.000500285 7.07813 7.89848e-06 7.2V17.1C7.89848e-06 17.3387 0.0921952 17.5676 0.256289 17.7364C0.420384 17.9052 0.642943 18 0.875007 18H2.62501C2.85707 18 3.07963 17.9052 3.24372 17.7364C3.40782 17.5676 3.50001 17.3387 3.50001 17.1V16.2H17.5V17.1C17.5 17.3387 17.5922 17.5676 17.7563 17.7364C17.9204 17.9052 18.1429 18 18.375 18H20.125C20.3571 18 20.5796 17.9052 20.7437 17.7364C20.9078 17.5676 21 17.3387 21 17.1V7.2C21.0001 7.13917 20.9943 7.07849 20.9825 7.01887ZM4.37501 12.6C4.02889 12.6 3.69054 12.4944 3.40276 12.2966C3.11497 12.0989 2.89067 11.8177 2.75822 11.4888C2.62576 11.1599 2.59111 10.798 2.65863 10.4488C2.72616 10.0997 2.89283 9.77894 3.13757 9.52721C3.38231 9.27547 3.69413 9.10404 4.0336 9.03459C4.37306 8.96513 4.72493 9.00078 5.0447 9.13702C5.36447 9.27325 5.63778 9.50396 5.83008 9.79997C6.02237 10.096 6.125 10.444 6.125 10.8C6.125 11.2774 5.94063 11.7352 5.61244 12.0728C5.28425 12.4104 4.83913 12.6 4.37501 12.6ZM16.625 12.6C16.2789 12.6 15.9405 12.4944 15.6528 12.2966C15.365 12.0989 15.1407 11.8177 15.0082 11.4888C14.8758 11.1599 14.8411 10.798 14.9086 10.4488C14.9762 10.0997 15.1428 9.77894 15.3876 9.52721C15.6323 9.27547 15.9441 9.10404 16.2836 9.03459C16.6231 8.96513 16.9749 9.00078 17.2947 9.13702C17.6145 9.27325 17.8878 9.50396 18.0801 9.79997C18.2724 10.096 18.375 10.444 18.375 10.8C18.375 11.2774 18.1906 11.7352 17.8624 12.0728C17.5342 12.4104 17.0891 12.6 16.625 12.6ZM2.20173 6.3L3.74555 2.59594C3.94352 2.12006 4.48438 1.8 5.09196 1.8H15.908C16.5151 1.8 17.0565 2.12006 17.2545 2.59594L18.7983 6.3H2.20173Z"/>'},todos:{viewBox:'0 0 23 22',outline:'<path fill-rule="evenodd" clip-rule="evenodd" d="M21.4537 9.1121L22.7455 10.4184H22.7619C23.0794 10.7368 23.0794 11.2582 22.7619 11.5765L20.452 13.9092L20.9501 17.1585C20.9841 17.3732 20.9318 17.5927 20.8045 17.7687C20.6772 17.9447 20.4854 18.0628 20.2713 18.0971L17.0309 18.624L15.5311 21.5495C15.4305 21.7427 15.2585 21.8888 15.0518 21.9565C14.8452 22.0242 14.6203 22.0082 14.4254 21.9117L11.4969 20.4243L8.56845 21.9117C8.37378 22.0099 8.14829 22.0269 7.94116 21.9591C7.73402 21.8912 7.56205 21.744 7.46275 21.5495L5.96295 18.624L2.72249 18.0971C2.50878 18.062 2.31755 17.9437 2.19042 17.7679C2.0633 17.5921 2.01058 17.3731 2.04374 17.1585L2.54733 13.9092L0.237402 11.5765C0.0853095 11.4224 0 11.2143 0 10.9975C0 10.7806 0.0853095 10.5726 0.237402 10.4184L2.54733 8.08572L2.04921 4.83642C2.01516 4.62171 2.06753 4.40223 2.19481 4.22623C2.32208 4.05023 2.51386 3.93212 2.72796 3.89785L5.96842 3.37094L7.46823 0.445469C7.56762 0.252521 7.73902 0.106765 7.94509 0.0399432C8.15116 -0.0268782 8.37521 -0.00935219 8.56845 0.0887047L11.4969 1.57614L14.4254 0.0887047C14.6186 -0.00935219 14.8427 -0.0268782 15.0487 0.0399432C15.2548 0.106765 15.4262 0.252521 15.5256 0.445469L17.0199 3.37094L20.2604 3.89785C20.4741 3.93293 20.6653 4.05124 20.7924 4.22703C20.9196 4.40281 20.9723 4.62184 20.9391 4.83642L20.4355 8.08572L21.4537 9.1121ZM19.1875 16.6097L18.6839 13.3439H18.6785L20.9993 11.0002L18.6785 8.65654L19.1821 5.39077L15.9306 4.86386L14.4254 1.92193L11.486 3.41485L8.54656 1.92193L7.04128 4.86386L3.78987 5.39077L4.29345 8.65654L1.97258 11.0002L4.29345 13.3439L3.78987 16.6097L7.04128 17.1366L8.54656 20.0785L11.486 18.5856L14.4254 20.0785L15.9306 17.1366L19.1875 16.6097ZM8.50824 10.6928L10.1175 12.3065L14.4637 7.9485L15.6241 9.1121L11.0864 13.6622C10.9591 13.7896 10.808 13.8905 10.6417 13.9592C10.4755 14.028 10.2974 14.0632 10.1175 14.0629C9.7672 14.0629 9.41688 13.9312 9.14867 13.6622L7.34781 11.8564L8.50824 10.6928Z"/>',filled:'<path fill-rule="evenodd" clip-rule="evenodd" d="M7.4616 0.451536C7.66955 0.0458262 8.16205 -0.107686 8.567 0.0896866L11.5001 1.56998L14.4332 0.0896866C14.5295 0.0405318 14.6345 0.0108988 14.7422 0.00248705C14.8499 -0.00592467 14.9582 0.00705013 15.0609 0.0406678C15.1636 0.0742855 15.2587 0.127885 15.3406 0.198391C15.4226 0.268897 15.4899 0.354924 15.5386 0.451536L17.038 3.37923L20.2776 3.90556C20.7263 3.98231 21.0218 4.39899 20.9561 4.83759L20.4527 8.08327L22.762 10.4188C23.0793 10.7368 23.0793 11.2522 22.762 11.5812L20.4527 13.9167L20.9561 17.1624C20.9732 17.2683 20.9692 17.3766 20.9443 17.4809C20.9194 17.5853 20.8741 17.6836 20.811 17.7703C20.7479 17.857 20.6682 17.9302 20.5767 17.9859C20.4851 18.0415 20.3835 18.0784 20.2776 18.0944L17.038 18.6208L15.5386 21.5485C15.3307 21.9542 14.8382 22.1077 14.4332 21.9103L11.5001 20.43L8.567 21.9103C8.47074 21.9595 8.36574 21.9891 8.25803 21.9975C8.15032 22.0059 8.04201 21.9929 7.93931 21.9593C7.83662 21.9257 7.74155 21.8721 7.65958 21.8016C7.5776 21.7311 7.51032 21.6451 7.4616 21.5485L5.96221 18.6208L2.72265 18.0944C2.51011 18.0594 2.31984 17.942 2.1929 17.7676C2.06596 17.5933 2.01251 17.3759 2.0441 17.1624L2.54754 13.9167L0.238263 11.5812C0.0856089 11.4264 0 11.2176 0 11C0 10.7824 0.0856089 10.5736 0.238263 10.4188L2.54754 8.08327L2.0441 4.83759C2.02698 4.73169 2.03099 4.62343 2.05591 4.51909C2.08083 4.41474 2.12615 4.31639 2.18925 4.22971C2.25236 4.14303 2.33199 4.06975 2.42355 4.01411C2.51511 3.95847 2.61677 3.92157 2.72265 3.90556L5.96221 3.37923L7.4616 0.451536ZM9.8475 13.1163L15.5605 7.39247L16.7206 8.55478L10.8106 14.465C10.2743 15.0023 9.40972 15.0023 8.87344 14.465L6.80494 12.3926L7.96505 11.2303L9.8475 13.1163Z"/>'},settings:{viewBox:'0 0 20 22',outline:'<path d="M10.0106 6.5956C7.66666 6.5956 5.76817 8.56657 5.76817 11C5.76817 13.4334 7.66666 15.4044 10.0106 15.4044C12.3546 15.4044 14.253 13.4334 14.253 11C14.253 8.56657 12.3546 6.5956 10.0106 6.5956ZM10.0106 13.2022C8.86515 13.2022 7.88939 12.1892 7.88939 11C7.88939 9.81081 8.86515 8.7978 10.0106 8.7978C11.1561 8.7978 12.1318 9.81081 12.1318 11C12.1318 12.1892 11.1561 13.2022 10.0106 13.2022Z"/><path d="M18.9409 12.5415L18.4 12.2222C18.4531 11.8148 18.4849 11.4074 18.4849 11C18.4849 10.5926 18.4531 10.1852 18.4 9.77778L18.9409 9.45846C19.9591 8.85285 20.2985 7.4985 19.7152 6.45245L18.6546 4.54755C18.3717 4.04407 17.9087 3.67705 17.3663 3.52649C16.824 3.37592 16.2463 3.45401 15.7591 3.74374L15.197 4.08509C14.5818 3.57858 13.903 3.17117 13.1818 2.86286V2.2022C13.1818 0.990991 12.2273 0 11.0606 0H8.93939C7.77272 0 6.81817 0.990991 6.81817 2.2022V2.86286C6.10756 3.17117 5.42877 3.58959 4.80301 4.08509L4.24089 3.74374C3.2227 3.13814 1.92876 3.5015 1.34542 4.54755L0.284813 6.45245C-0.298522 7.50951 0.051479 8.85285 1.05906 9.45846L1.59997 9.77778C1.54694 10.1852 1.51512 10.5926 1.51512 11C1.51512 11.4074 1.54694 11.8148 1.59997 12.2222L1.05906 12.5415C0.0408729 13.1471 -0.298522 14.5015 0.284813 15.5475L1.34542 17.4525C1.92876 18.4985 3.2227 18.8619 4.24089 18.2563L4.80301 17.9149C5.41817 18.4214 6.09696 18.8288 6.81817 19.1371V19.7978C6.81817 21.009 7.77272 22 8.93939 22H11.0606C12.2273 22 13.1818 21.009 13.1818 19.7978V19.1371C13.9007 18.8199 14.5778 18.4092 15.197 17.9149L15.7591 18.2563C16.7667 18.8619 18.0712 18.4985 18.6546 17.4525L19.7152 15.5475C20.2985 14.4905 19.9485 13.1471 18.9409 12.5415ZM16.194 9.48048C16.3106 9.97598 16.3743 10.4935 16.3743 11C16.3743 11.5065 16.3106 12.013 16.194 12.5195C16.1377 12.7518 16.1559 12.9968 16.2459 13.2174C16.3358 13.4379 16.4926 13.622 16.6924 13.7417L17.8803 14.4575L16.8197 16.3624L15.6106 15.6356C15.2076 15.3934 14.6879 15.4595 14.3485 15.7898C13.6273 16.5055 12.747 17.034 11.8242 17.3313C11.3788 17.4745 11.0712 17.9039 11.0712 18.3884V19.8198H8.95V18.3884C8.95 17.9039 8.64242 17.4745 8.19696 17.3313C7.26363 17.034 6.39393 16.5055 5.67271 15.7898C5.50695 15.6259 5.29496 15.5214 5.06782 15.4916C4.84068 15.4619 4.61035 15.5085 4.41059 15.6246L3.20149 16.3514L2.14088 14.4464L3.32876 13.7307C3.7424 13.4885 3.94392 12.982 3.82725 12.5085C3.71058 12.013 3.64695 11.4955 3.64695 10.989C3.64695 10.4825 3.71058 9.96496 3.82725 9.46947C3.88351 9.23718 3.86528 8.99218 3.77533 8.77162C3.68537 8.55106 3.52859 8.36696 3.32876 8.24725L2.14088 7.53153L3.20149 5.62663L4.41059 6.35335C4.81362 6.5956 5.33332 6.52953 5.67271 6.1992C6.39393 5.48348 7.27423 4.95495 8.19696 4.65766C8.64242 4.51451 8.95 4.08509 8.95 3.6006V2.16917H11.0712V3.6006C11.0712 4.08509 11.3788 4.51451 11.8242 4.65766C12.7576 4.95495 13.6273 5.48348 14.3485 6.1992C14.6879 6.54054 15.2076 6.5956 15.6106 6.35335L16.8197 5.62663L17.8803 7.53153L16.6924 8.24725C16.2788 8.48949 16.0773 8.996 16.194 9.46947V9.48048Z"/>',filled:'<path d="M19.7152 6.45245L18.6546 4.54755C18.5154 4.29726 18.3301 4.07791 18.1092 3.90203C17.8884 3.72615 17.6363 3.59719 17.3673 3.52254C17.0984 3.44789 16.818 3.429 16.542 3.46696C16.2661 3.50491 16 3.59897 15.7591 3.74374L15.197 4.08509C14.5818 3.57858 13.903 3.17117 13.1818 2.86286V2.2022C13.1818 0.990991 12.2273 0 11.0606 0H8.93939C7.77272 0 6.81817 0.990991 6.81817 2.2022V2.86286C6.10756 3.17117 5.42877 3.58959 4.80301 4.08509L4.24089 3.74374C3.2227 3.13814 1.92876 3.5015 1.34542 4.54755L0.284813 6.45245C-0.298522 7.50951 0.051479 8.85285 1.05906 9.45846L1.58936 9.77778C1.53633 10.1852 1.50451 10.5926 1.50451 11C1.50451 11.4074 1.53633 11.8148 1.58936 12.2222L1.05906 12.5415C0.0408729 13.1471 -0.298522 14.5015 0.284813 15.5475L1.34542 17.4525C1.92876 18.4985 3.23331 18.8619 4.24089 18.2563L4.80301 17.9149C5.41817 18.4214 6.09696 18.8288 6.81817 19.1371V19.7978C6.81817 21.009 7.77272 22 8.93939 22H11.0606C12.2273 22 13.1818 21.009 13.1818 19.7978V19.1371C13.9007 18.8199 14.5778 18.4092 15.197 17.9149L15.7591 18.2563C16.7773 18.8619 18.0712 18.4985 18.6546 17.4525L19.7152 15.5475C20.2985 14.4905 19.9485 13.1471 18.9409 12.5415L18.4106 12.2222C18.4637 11.8148 18.4955 11.4074 18.4955 11C18.4955 10.5926 18.4637 10.1852 18.4106 9.77778L18.9409 9.45846C19.9591 8.85285 20.2985 7.4985 19.7152 6.45245ZM10 15.4154C7.65605 15.4154 5.75756 13.4444 5.75756 11.011C5.75756 8.57758 7.65605 6.60661 10 6.60661C12.3439 6.60661 14.2424 8.57758 14.2424 11.011C14.2424 13.4444 12.3439 15.4154 10 15.4154Z"/>'}};
 // Nav-bar tabs use their own filled/outline SVG pair, shown or hidden purely by CSS off
@@ -94,7 +94,7 @@ let freshCategoryPage=false;
 function commitList(markup){const list=$('#list'),fresh=freshCategoryPage;freshCategoryPage=false;if(!categorySwipe||!list.hasPointerCapture?.(categorySwipe.pointerId)){const activePage=categoryPageRoot(list),adjacentPage=list.querySelector(':scope > .category-page-adjacent'),settling=(activePage!==list&&activePage.getAnimations?.().length)||adjacentPage?.getAnimations?.().length;if(!settling){if(activePage!==list){activePage.style.transform='';activePage.style.willChange=''}adjacentPage?.remove();list.classList.remove('category-paging');categorySwipe=null}}const output=usesCategoryPages()?`<div class="category-page-current">${markup}</div>`:markup,changed=output!==listMarkup;if(changed){const oldRoot=categoryPageRoot(list),animate=tab!=='todos'&&!!list.animate&&!document.hidden&&!reducedMotion()&&!inViewTransition()&&!!list.offsetParent&&oldRoot.children.length<=300,before=animate?(fresh?new Map():new Map([...oldRoot.children].map(node=>[node,node.getBoundingClientRect().top]))):null;const template=document.createElement('template');template.innerHTML=output;patchListChildren(list,template.content);listMarkup=output;if(before&&loaded)animateListChanges(categoryPageRoot(list),before)}syncSelectedListRow();return changed}
 // Legacy photos are ids into dailyPhotos, on the record itself or on reference items (home items, photo guides).
 const usesLegacyPhoto=r=>[r,...Object.values(r).flatMap(v=>Array.isArray(v)?v:[])].some(item=>Array.isArray(item?.photos)&&item.photos.some(photo=>typeof photo==='string'));
-async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=78-nav-icon-18px');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
+async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=79-recipe-share');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
 async function signIn(){$('#signIn').disabled=true;try{const c=await initCloud();await c.signIn()}catch(err){$('#gateStatus').textContent=err.code==='auth/unauthorized-domain'?'Add snowsences.github.io to Firebase Authentication → Authorized domains.':`Sign-in did not finish. ${err.code||'Check your connection and try again.'}`}finally{$('#signIn').disabled=false}}
 $('#signIn').onclick=signIn;
 const opKey=op=>`${op.collection||'records'}:${op.id}`;
@@ -237,9 +237,9 @@ function renderDetail(){
  if(!hasDetail){detail.replaceChildren();return}const sourceRow=$('#list').querySelector(`[data-open="${CSS.escape(r.id)}"]`);detail.style.setProperty('--detail-accent',sourceRow?.style.getPropertyValue('--band-top')||sourceRow?.style.getPropertyValue('--band')||'var(--tab)');
  let body='';if(r.type==='recipe'){body=`<p class="sub">${e(recipeCategory(r))} · ${e(dateLabel(r.date))}</p>${photoMarkup(r.photos,r.coverPhotoId)}${recipeIngredientsMarkup(r)}${reading(r.recipeIngredients?.length?'Legacy ingredients':'Ingredients',r.ingredients,r.richText)}${reading('Method',r.method,r.richText)}${reading('Notes',r.body,r.richText)}`}else if(r.type==='ingredient'){body=ingredientDetailMarkup(r)}else if(r.type==='note'){body=isNoteHub(r)?renderNoteHub(r):`<p class="sub">${e(noteCategory(r))}</p><div class="reading ${r.richText?'rich-reading':''}">${r.richText?linkifyRichHTML(r.body):linkify(r.body)}</div>`}else if(r.type==='car'){const logs=listType('maintenance').filter(l=>l.carId===r.id).sort(byDate),reminders=listType('reminder').filter(l=>l.carId===r.id&&!l.done).sort((a,b)=>String(a.date||'9999').localeCompare(String(b.date||'9999')));body=`<p class="sub">${e([r.year,r.make,r.model].filter(Boolean).join(' '))}${r.owner?' · '+e(r.owner):''}</p><p class="small car-ownership">${e(carOwnership(r))}</p>${carGallery(r)}${reading('Details',r.body,r.richText)}${r.odometer?`<p>Odometer · ${Number(r.odometer).toLocaleString()} ${e(r.unit||'mi')}</p>`:''}${r.vin?`<p>VIN · ${e(r.vin)}</p>`:''}<h3>Upcoming maintenance</h3>${reminders.length?reminders.map(l=>`<div class="reminder"><button data-child="${e(l.id)}"><b>${e(l.title)}</b><small>${e(dateLabel(l.date)||'No date')}${l.mileage?' · '+Number(l.mileage).toLocaleString()+' '+e(r.unit||'mi'):''}${l.date&&l.date<localDate()?' · Overdue':''}</small></button><button class="reminder-done" data-reminder-done="${e(l.id)}" aria-label="Mark ${e(l.title)} done">${icon('check')}<span>Mark done</span></button></div>`).join(''):'<p class="small">No upcoming maintenance.</p>'}<button class="secondary" id="addReminder">Add reminder</button><h3>Maintenance history</h3>${logs.length?logs.map(l=>`<div class="reminder"><button data-child="${e(l.id)}"><b>${e(l.title)}</b><small>${e(maintenanceHistoryLabel(l))}${l.mileage?' · '+Number(l.mileage).toLocaleString()+' '+e(r.unit||'mi'):''}${l.cost?' · $'+Number(l.cost).toFixed(2):''}</small></button></div>`).join(''):'<p class="small">No maintenance logged yet.</p>'}<button class="secondary" id="addMaintenance">Log maintenance</button>`}
  const hero=r.type==='car'?carHero(r):r.type==='ingredient'?ingredientHero(r):'';
- const detailHeadAction=noteKind(r)==='packing'?'<button class="primary hub-head-action" data-hub-action="add-packing-trip">Add Trip</button>':noteKind(r)==='photography'?'<button class="primary hub-head-action" data-hub-action="add-photo-guide">Add Guide</button>':'';
+ const detailHeadAction=noteKind(r)==='packing'?'<button class="primary hub-head-action" data-hub-action="add-packing-trip">Add Trip</button>':noteKind(r)==='photography'?'<button class="primary hub-head-action" data-hub-action="add-photo-guide">Add Guide</button>':r.type==='recipe'?`<button class="icon-button" id="shareRecipe" aria-label="Share recipe">${icon('share')}</button>`:'';
  $('#detail').innerHTML=`${hero}<div class="${r.type==='car'?'car-content':r.type==='ingredient'?'ingredient-content':'entry-content'}"><button class="text-button mobile-back" id="back">‹ Back</button><div class="detail-head"><h2>${e(title(r))}</h2>${detailHeadAction}</div>${body}<div class="detail-actions"><button class="secondary" id="editEntry">Edit</button>${r.type==='ingredient'?'<button class="ghost" id="mergeIngredient">Merge</button>':''}${r.type==='note'?`<button class="ghost" id="pinNote">${r.pinned?'Unpin':'Pin note'}</button>`:''}<button class="danger" id="deleteEntry">Delete</button></div></div>`;
- $('#addCarPhotos')?.addEventListener('click',()=>{openEditor(r);$('#photoInput')?.click()});$('#back').onclick=appBack;$('#editEntry')?.addEventListener('click',()=>isNoteHub(r)?openHubInfoEditor(r):openEditor(r));$('#deleteEntry').onclick=()=>removeRecord(r);$('#mergeIngredient')?.addEventListener('click',()=>mergeIngredient(r));$('#pinNote')?.addEventListener('click',()=>save({...r,pinned:!r.pinned}));$('#addReminder')?.addEventListener('click',()=>openEditor(null,'reminder',r.id));$('#addMaintenance')?.addEventListener('click',()=>openEditor(null,'maintenance',r.id));$$('[data-child]').forEach(b=>b.onclick=()=>openEditor(get(b.dataset.child)));$$('[data-reminder-done]').forEach(b=>b.onclick=()=>collapseThen(b.closest('.reminder'),()=>completeCarReminder(get(b.dataset.reminderDone),r.id)));if(isNoteHub(r)){bindNoteHubActions(r);requestAnimationFrame(()=>{detail.scrollTop=hubState(r).scrollTop})}requestAnimationFrame(sizeDetailTray)}
+ $('#addCarPhotos')?.addEventListener('click',()=>{openEditor(r);$('#photoInput')?.click()});$('#back').onclick=appBack;$('#editEntry')?.addEventListener('click',()=>isNoteHub(r)?openHubInfoEditor(r):openEditor(r));$('#shareRecipe')?.addEventListener('click',()=>shareRecipeCard(r));$('#deleteEntry').onclick=()=>removeRecord(r);$('#mergeIngredient')?.addEventListener('click',()=>mergeIngredient(r));$('#pinNote')?.addEventListener('click',()=>save({...r,pinned:!r.pinned}));$('#addReminder')?.addEventListener('click',()=>openEditor(null,'reminder',r.id));$('#addMaintenance')?.addEventListener('click',()=>openEditor(null,'maintenance',r.id));$$('[data-child]').forEach(b=>b.onclick=()=>openEditor(get(b.dataset.child)));$$('[data-reminder-done]').forEach(b=>b.onclick=()=>collapseThen(b.closest('.reminder'),()=>completeCarReminder(get(b.dataset.reminderDone),r.id)));if(isNoteHub(r)){bindNoteHubActions(r);requestAnimationFrame(()=>{detail.scrollTop=hubState(r).scrollTop})}requestAnimationFrame(sizeDetailTray)}
 async function completeCarReminder(reminder,carId){if(!reminder||reminder.deleted)return;const completedDate=localDate(),scheduledDate=reminder.scheduledDate||reminder.date||'';tab='cars';selected=carId;await save({...reminder,type:'maintenance',date:completedDate,scheduledDate,completedDate,done:true,completedAt:new Date().toISOString()});tab='cars';selected=carId;writeViewHistory(true);renderList();renderDetail()}
 function nextScheduleDate(schedule,asOf=localDate()){for(let i=0;i<1200;i++){const date=monthlyDate(schedule.startDate,i*schedule.intervalMonths);if(!date||date>=asOf)return date||''}return ''}
 async function cancelSchedule(schedule){if(!schedule||schedule.cancelledOn)return;if(!await ask('Cancel reminder?',`Future “${schedule.title}” To-Dos will stop. To-Dos that have already appeared will remain.`,'Cancel reminder',true))return;await save({...schedule,cancelledOn:localDate()});if(tab==='settings')renderSettings();else renderTodos();toast('Recurring reminder canceled')}
@@ -470,6 +470,164 @@ $('#add').onclick=()=>tab==='notes'?openNoteCreator():openEditor();$('#home').on
 function entryCover(r){return r.photos?.find(p=>photoKey(p)===r.coverPhotoId)||r.photos?.[0]}
 function carCover(r){return entryCover(r)}
 function recipeCover(r){return entryCover(r)}
+// Flattens sanitized rich HTML into an array of plain lines, one per block/list item, with a
+// bullet or number prefix for list items, since canvas can only draw plain wrapped text.
+function richTextBlockLines(value,formatted){
+ const text=String(value||'');
+ if(!text.trim())return [];
+ if(!formatted)return text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+ const template=document.createElement('template');
+ template.innerHTML=sanitizeRichHTML(text);
+ const lines=[];
+ const push=(node,prefix)=>{const t=(node.textContent||'').replace(/\s+/g,' ').trim();if(t)lines.push(prefix+t)};
+ const walk=parent=>{
+  for(const child of parent.childNodes){
+   if(child.nodeType!==Node.ELEMENT_NODE)continue;
+   if(child.tagName==='UL')for(const li of child.children)push(li,'•  ');
+   else if(child.tagName==='OL')child.querySelectorAll(':scope > li').forEach((li,i)=>push(li,`${i+1}.  `));
+   else if(child.tagName==='P'||child.tagName==='DIV')push(child,'');
+   else walk(child);
+  }
+ };
+ walk(template.content);
+ return lines.length?lines:[template.content.textContent.replace(/\s+/g,' ').trim()].filter(Boolean);
+}
+// Standard canvas word-wrap: greedily fills each line up to maxWidth, breaking on spaces.
+function wrapCanvasText(ctx,text,maxWidth){
+ const words=text.split(' '),lines=[];
+ let line='';
+ for(const word of words){
+  const attempt=line?`${line} ${word}`:word;
+  if(ctx.measureText(attempt).width>maxWidth&&line){lines.push(line);line=word}
+  else line=attempt;
+ }
+ if(line)lines.push(line);
+ return lines;
+}
+function loadImageForCanvas(url){
+ return new Promise((resolve,reject)=>{
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  img.onload=()=>resolve(img);
+  img.onerror=()=>reject(Error('image failed to load'));
+  img.src=url;
+ });
+}
+async function buildRecipeShareImage(r){
+ const W=1080,PAD=64,CW=W-PAD*2;
+ const sourceRow=$('#list').querySelector(`[data-open="${CSS.escape(r.id)}"]`);
+ const accent=sourceRow?.style.getPropertyValue('--band-top')||'#F9732F';
+ const cover=recipeCover(r),photoUrl=cover?photoSource(cover,'detail'):'';
+ let photo=null;
+ if(photoUrl){try{photo=await loadImageForCanvas(photoUrl)}catch{photo=null}}
+ await Promise.all(['700 56px Figtree','600 40px Figtree','600 34px Figtree','400 32px Figtree'].map(f=>document.fonts.load(f).catch(()=>{})));
+ const meta=[recipeCategory(r),dateLabel(r.date)].filter(Boolean).join(' · ');
+ const ingredientRows=(r.recipeIngredients||[]).map(item=>({amount:item.amount||'',name:ingredientName(item.ingredientId),notes:item.notes||''}));
+ const legacyIngredients=ingredientRows.length?[]:richTextBlockLines(r.ingredients,false);
+ const methodLines=richTextBlockLines(r.method,r.richText);
+ const notesLines=richTextBlockLines(r.body,r.richText);
+ const PHOTO_H=photo?Math.round(CW*3/4):0;
+ const measure=document.createElement('canvas').getContext('2d');
+ const section=(heading,lines,font)=>{
+  if(!lines.length)return {lines:[],height:0};
+  measure.font=font;
+  const wrapped=lines.flatMap(l=>wrapCanvasText(measure,l,CW));
+  const fontSize=parseInt(font.match(/(\d+)px/)[1]),lineHeight=Math.round(fontSize*1.45);
+  return {heading,lines:wrapped,lineHeight,height:44+wrapped.length*lineHeight+28};
+ };
+ measure.font='700 56px Figtree';
+ const titleLines=wrapCanvasText(measure,r.title,CW);
+ const ingredientLineHeight=48;
+ const ingredientsHeight=ingredientRows.length?44+ingredientRows.length*ingredientLineHeight+28:section('Ingredients',legacyIngredients,'400 32px Figtree').height;
+ const methodSection=section('Method',methodLines,'400 32px Figtree');
+ const notesSection=section('Notes',notesLines,'400 32px Figtree');
+ let y=PAD;
+ y+=40; // wordmark
+ y+=titleLines.length*66+16;
+ y+=meta?44:0;
+ y+=PHOTO_H?PHOTO_H+36:0;
+ if(ingredientRows.length||legacyIngredients.length)y+=ingredientsHeight;
+ y+=methodSection.height;
+ y+=notesSection.height;
+ y+=64; // footer
+ const totalHeight=y+PAD;
+ const canvas=document.createElement('canvas');
+ canvas.width=W;canvas.height=totalHeight;
+ const ctx=canvas.getContext('2d');
+ ctx.fillStyle='#17242d';ctx.fillRect(0,0,W,totalHeight);
+ ctx.fillStyle=accent;ctx.fillRect(0,0,W,8);
+ let cy=PAD;
+ ctx.fillStyle='#ffc44c';ctx.font='600 26px Figtree';ctx.textBaseline='alphabetic';
+ ctx.fillText('Red Ridge',PAD,cy+22);
+ cy+=40;
+ ctx.fillStyle='#f5f8fa';ctx.font='700 56px Figtree';
+ for(const line of titleLines){cy+=52;ctx.fillText(line,PAD,cy);cy+=14}
+ cy+=16;
+ if(meta){ctx.fillStyle='#b3c4ce';ctx.font='400 30px Figtree';cy+=30;ctx.fillText(meta,PAD,cy);cy+=14}
+ if(photo){
+  const dx=PAD,dy=cy+16,dw=CW,dh=PHOTO_H,r2=24;
+  ctx.save();
+  if(ctx.roundRect){const path=new Path2D();path.roundRect(dx,dy,dw,dh,r2);ctx.clip(path)}
+  else{ctx.beginPath();ctx.moveTo(dx+r2,dy);ctx.arcTo(dx+dw,dy,dx+dw,dy+dh,r2);ctx.arcTo(dx+dw,dy+dh,dx,dy+dh,r2);ctx.arcTo(dx,dy+dh,dx,dy,r2);ctx.arcTo(dx,dy,dx+dw,dy,r2);ctx.closePath();ctx.clip()}
+  const scale=Math.max(dw/photo.width,dh/photo.height),sw=dw/scale,sh=dh/scale,sx=(photo.width-sw)/2,sy=(photo.height-sh)/2;
+  ctx.drawImage(photo,sx,sy,sw,sh,dx,dy,dw,dh);
+  ctx.restore();
+  cy=dy+dh+36;
+ }
+ const heading=text=>{ctx.fillStyle=accent;ctx.font='600 34px Figtree';cy+=34;ctx.fillText(text,PAD,cy);cy+=22};
+ if(ingredientRows.length){
+  heading('Ingredients');
+  ctx.font='400 30px Figtree';
+  for(const row of ingredientRows){
+   cy+=ingredientLineHeight;
+   ctx.fillStyle='#b3c4ce';const amountText=row.amount?`${row.amount}  `:'';ctx.fillText(amountText,PAD,cy);
+   const amountWidth=amountText?ctx.measureText(amountText).width:0;
+   ctx.fillStyle='#f5f8fa';ctx.fillText(row.name,PAD+amountWidth,cy);
+  }
+  cy+=28;
+ }else if(legacyIngredients.length){
+  heading('Ingredients');
+  ctx.fillStyle='#f5f8fa';ctx.font='400 30px Figtree';
+  for(const line of legacyIngredients.flatMap(l=>wrapCanvasText(measure,l,CW))){cy+=44;ctx.fillText(line,PAD,cy)}
+  cy+=28;
+ }
+ if(methodSection.lines.length){
+  heading('Method');
+  ctx.fillStyle='#f5f8fa';ctx.font='400 32px Figtree';
+  for(const line of methodSection.lines){cy+=methodSection.lineHeight;ctx.fillText(line,PAD,cy)}
+  cy+=28;
+ }
+ if(notesSection.lines.length){
+  heading('Notes');
+  ctx.fillStyle='#f5f8fa';ctx.font='400 32px Figtree';
+  for(const line of notesSection.lines){cy+=notesSection.lineHeight;ctx.fillText(line,PAD,cy)}
+  cy+=28;
+ }
+ ctx.fillStyle='#b3c4ce';ctx.font='400 24px Figtree';
+ ctx.fillText('Shared from Red Ridge',PAD,totalHeight-PAD+8);
+ return new Promise(resolve=>canvas.toBlob(resolve,'image/png',0.95));
+}
+async function shareRecipeCard(r){
+ const button=$('#shareRecipe');
+ if(button)button.disabled=true;
+ try{
+  const blob=await buildRecipeShareImage(r);
+  if(!blob)throw Error('Could not create the image.');
+  const file=new File([blob],`${(r.title||'recipe').replace(/[^\w-]+/g,'-').slice(0,60)}.png`,{type:'image/png'});
+  if(navigator.canShare?.({files:[file]})){
+   await navigator.share({files:[file],title:r.title});
+  }else{
+   const url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download=file.name;a.click();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+   toast('Sharing images isn’t supported here · image downloaded instead');
+  }
+ }catch(err){
+  if(err.name!=='AbortError')toast(err.message||'Could not share this recipe.');
+ }finally{
+  if(button)button.disabled=false;
+ }
+}
 // Ingredients without a photo get a tinted tile with their initial; the colour is stable per ingredient.
 const INGREDIENT_TILES=['#ff9277','#ffd064','#8fd694','#85c8d8','#85b9f2','#c4a0eb'];
 function ingredientTile(item){const name=String(item.title||'').trim();let hash=0;for(const c of String(item.id))hash=(hash*31+c.charCodeAt(0))>>>0;return `data-initial="${e(Array.from(name)[0]?.toLocaleUpperCase()||'?')}" style="--tile:${INGREDIENT_TILES[hash%INGREDIENT_TILES.length]}"`}

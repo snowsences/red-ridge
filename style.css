@@ -351,3 +351,6 @@ main[data-tab=cars] .section-label{font-size:16px}.car-card-copy strong{font-siz
 .packing-template-remove{font-size:20px}.packing-trip-menu summary{font-size:18px}.packing-trip-row strong{font-size:14px}.packing-trip-row small{font-size:12px}.reminder button.reminder-done{font-size:13px}.ingredient-photo-drop[data-initial]::before{font-size:clamp(38px,7vw,62px)}
 .todo-main{font-size:16px}.todo-main h2{font-size:30px}.todo-main h3{font-size:22px}.todo-main small,.todo-main .small{font-size:16px}
 @media (max-width:680px){h1{font-size:40px}.gate h1{font-size:42px}.desktop-header .wordmark{font-size:26px}.ingredient-card-copy strong{font-size:14px}.ingredient-card-copy span{font-size:11px}}
+.icon-button{flex:none;width:40px;height:40px;min-height:40px;border-radius:50%;display:grid;place-items:center;background:#ffffff14;color:var(--ink)}
+.icon-button .icon{width:20px;height:20px}
+@media (hover:hover){.icon-button:hover{background:#ffffff22}}
