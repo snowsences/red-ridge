@@ -286,7 +286,7 @@ main[data-tab=cars] #list .car-card{content-visibility:auto;contain-intrinsic-si
 main.note-hub-open .workspace{grid-template-columns:minmax(240px,320px) minmax(0,1fr)}
 .detail.note-hub-detail{padding:0;border-radius:12px;overflow:hidden}
 .note-hub-detail>.entry-content{padding:28px 30px 30px}
-.note-hub-detail>.entry-content>.sub{margin-bottom:18px}
+.note-hub-detail>.entry-content>.sub{margin:0 0 8px}
 .note-hub{margin:0 -30px}
 .hub-tabs{display:flex;gap:0;padding:0 30px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .hub-tabs::-webkit-scrollbar{display:none}.hub-tabs button{position:relative;flex:0 0 auto;min-height:48px;padding:10px 16px;background:none;color:var(--muted);white-space:nowrap}
