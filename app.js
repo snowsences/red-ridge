@@ -1,5 +1,5 @@
-import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=88-packing-edit-fix';
-const APP_BUILD='88-packing-edit-fix';
+import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=89-packing-save-all-edits';
+const APP_BUILD='89-packing-save-all-edits';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 function photoErrorAction(image){const parent=image.parentElement;if(!parent||parent.querySelector(':scope > .photo-error-retry'))return;parent.classList.add('photo-error-host');const retry=document.createElement('span');retry.className='photo-error-retry';retry.tabIndex=0;retry.setAttribute('role','button');retry.textContent='Photo failed · Retry';const reload=event=>{event.preventDefault();event.stopPropagation();retry.remove();image.classList.remove('photo-load-settled','photo-load-error');const source=image.currentSrc||image.src;image.removeAttribute('src');requestAnimationFrame(()=>{image.src=source})};retry.addEventListener('click',reload);retry.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();reload(event)}});parent.append(retry)}
 function settlePhotoLoad(event){const image=event.target;if(!(image instanceof HTMLImageElement))return;if(event instanceof Event&&event.type==='load'&&!image.classList.contains('photo-load-settled')&&!reducedMotion()&&!inViewTransition())image.animate?.([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});image.classList.add('photo-load-settled');image.classList.toggle('photo-load-error',event.type==='error');if(event.type==='error')photoErrorAction(image);else{image.parentElement?.querySelector(':scope > .photo-error-retry')?.remove();image.parentElement?.classList.remove('photo-error-host')}}
@@ -94,7 +94,7 @@ let freshCategoryPage=false;
 function commitList(markup){const list=$('#list'),fresh=freshCategoryPage;freshCategoryPage=false;if(!categorySwipe||!list.hasPointerCapture?.(categorySwipe.pointerId)){const activePage=categoryPageRoot(list),adjacentPage=list.querySelector(':scope > .category-page-adjacent'),settling=(activePage!==list&&activePage.getAnimations?.().length)||adjacentPage?.getAnimations?.().length;if(!settling){if(activePage!==list){activePage.style.transform='';activePage.style.willChange=''}adjacentPage?.remove();list.classList.remove('category-paging');categorySwipe=null}}const output=usesCategoryPages()?`<div class="category-page-current">${markup}</div>`:markup,changed=output!==listMarkup;if(changed){const oldRoot=categoryPageRoot(list),animate=tab!=='todos'&&!!list.animate&&!document.hidden&&!reducedMotion()&&!inViewTransition()&&!!list.offsetParent&&oldRoot.children.length<=300,before=animate?(fresh?new Map():new Map([...oldRoot.children].map(node=>[node,node.getBoundingClientRect().top]))):null;const template=document.createElement('template');template.innerHTML=output;patchListChildren(list,template.content);listMarkup=output;if(before&&loaded)animateListChanges(categoryPageRoot(list),before)}syncSelectedListRow();return changed}
 // Legacy photos are ids into dailyPhotos, on the record itself or on reference items (home items, photo guides).
 const usesLegacyPhoto=r=>[r,...Object.values(r).flatMap(v=>Array.isArray(v)?v:[])].some(item=>Array.isArray(item?.photos)&&item.photos.some(photo=>typeof photo==='string'));
-async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=88-packing-edit-fix');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
+async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=89-packing-save-all-edits');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
 async function signIn(){$('#signIn').disabled=true;try{const c=await initCloud();await c.signIn()}catch(err){$('#gateStatus').textContent=err.code==='auth/unauthorized-domain'?'Add snowsences.github.io to Firebase Authentication → Authorized domains.':`Sign-in did not finish. ${err.code||'Check your connection and try again.'}`}finally{$('#signIn').disabled=false}}
 $('#signIn').onclick=signIn;
 const opKey=op=>`${op.collection||'records'}:${op.id}`;
@@ -321,7 +321,11 @@ function packingNoteUpdate(note,changes){const next={...note,...changes,title:NO
 // anyone was mid-typing in a DIFFERENT row's inline editor (not just the row actually being
 // saved). Snapshot every other row still in edit mode first and reopen them afterward, with
 // their typed-but-unsaved text intact, so saving one row never affects any other.
-function packingEditSnapshot(exceptWrap){return [...$$('#packingItemList .packing-trip-wrap.editing')].filter(wrap=>wrap!==exceptWrap).map(wrap=>({id:wrap.dataset.packingItemId,value:wrap.querySelector('.packing-item-input')?.value??''}))}
+// Any packing save fully re-renders the list. A row still in edit mode at that point isn't part
+// of the save, so a naive re-render would silently discard whatever it had typed; instead any
+// such row (other than ones this save is itself closing, passed in exceptWraps) is snapshotted
+// beforehand and reopened afterward with its text intact.
+function packingEditSnapshot(exceptWraps){const except=new Set(exceptWraps||[]);return [...$$('#packingItemList .packing-trip-wrap.editing')].filter(wrap=>!except.has(wrap)).map(wrap=>({id:wrap.dataset.packingItemId,value:wrap.querySelector('.packing-item-input')?.value??''}))}
 function restorePackingEdits(note,snapshot){
  for(const entry of snapshot){
   const existing=packingItems(note).find(item=>item.id===entry.id),isNew=!existing;
@@ -330,8 +334,8 @@ function restorePackingEdits(note,snapshot){
   if(wrap)openPackingEditUI(wrap,note,existing||{id:entry.id,title:'',done:false},isNew,entry.value);
  }
 }
-async function savePackingNote(note,changes,message='',exceptWrap=null){
- const editing=packingEditSnapshot(exceptWrap);
+async function savePackingNote(note,changes,message='',exceptWraps=null){
+ const editing=packingEditSnapshot(exceptWraps);
  const next=packingNoteUpdate(note,{packingItems:packingItems(note),...changes});
  await save(next,{waitForServer:navigator.onLine});
  // persist() schedules its own render via requestAnimationFrame; left alone it would fire after
@@ -355,6 +359,28 @@ function insertBlankPackingRow(item){
  list.insertAdjacentHTML('afterbegin',packingItemMarkup(item));
  return list.firstElementChild;
 }
+function packingEditingRows(){return [...$$('#packingItemList .packing-trip-wrap.editing')].map(wrap=>wrap._packingEdit).filter(Boolean)}
+// Pressing Save (or Enter) on any one row commits every row currently in edit mode together, in
+// a single save — not just the row that was clicked. Otherwise, e.g. adding two new rows and
+// saving only the second would leave the first an orphaned draft (or lose it outright once the
+// list re-renders around a save that never accounted for it).
+async function commitAllPackingEdits(note){
+ const rows=packingEditingRows();
+ if(!rows.length)return;
+ for(const r of rows)r.saveButton.disabled=true;
+ let items=packingItems(note);
+ const wraps=[];
+ for(const r of rows){
+  const title=r.input.value.trim();
+  if(!title&&!r.isNew){r.wrap.classList.remove('editing');r.row.innerHTML=`<strong data-text="${e(r.item.title)}">${e(r.item.title)}</strong>`;continue}
+  wraps.push(r.wrap);
+  const finalTitle=title||'Item';
+  items=r.isNew?[...items,{...r.item,title:finalTitle}]:items.map(entry=>entry.id===r.item.id?{...entry,title:finalTitle}:entry);
+ }
+ if(!wraps.length)return;
+ const message=wraps.length>1?'Items saved':rows.find(r=>r.wrap===wraps[0])?.isNew?'Item added':'Item updated';
+ await savePackingNote(note,{packingItems:items},message,wraps);
+}
 // Tapping a row's label swaps it for an inline input + Save, in place, without a full re-render.
 // Saving an existing item with a blank name reverts to its prior title; saving a brand-new one
 // (added via Add Item, not yet persisted) defaults to "Item" instead, since it has no prior title.
@@ -365,18 +391,10 @@ function openPackingEditUI(wrap,note,item,isNew,initialValue){
  const row=wrap.querySelector('.packing-trip-row');
  row.innerHTML=`<input class="packing-item-input" value="${e(initialValue)}" maxlength="300" placeholder="Item name" aria-label="Item name"><button type="button" class="secondary packing-item-save">Save</button>`;
  const input=row.querySelector('.packing-item-input'),saveButton=row.querySelector('.packing-item-save');
+ wrap._packingEdit={item,isNew,input,saveButton,row,wrap};
  input.focus();input.select();
- let done=false;
- const commit=async()=>{
-  if(done)return;
-  const title=input.value.trim();
-  if(!title&&!isNew){wrap.classList.remove('editing');row.innerHTML=`<strong data-text="${e(item.title)}">${e(item.title)}</strong>`;return}
-  done=true;saveButton.disabled=true;
-  const finalTitle=title||'Item',items=isNew?[...packingItems(note),{...item,title:finalTitle}]:packingItems(note).map(entry=>entry.id===item.id?{...entry,title:finalTitle}:entry);
-  await savePackingNote(note,{packingItems:items},isNew?'Item added':'Item updated',wrap);
- };
- saveButton.onclick=commit;
- input.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();commit()}};
+ saveButton.onclick=()=>commitAllPackingEdits(note);
+ input.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();commitAllPackingEdits(note)}};
 }
 function enterPackingItemEdit(wrap,note,item,isNew){openPackingEditUI(wrap,note,item,isNew,isNew?'':item.title)}
 function addPackingItem(note){
