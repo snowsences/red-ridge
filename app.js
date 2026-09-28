@@ -1,5 +1,5 @@
-import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=87-packing-row-fix';
-const APP_BUILD='87-packing-row-fix';
+import {DEFAULT_CONFIG,PALETTES,escapeHTML as e,linkify,validateBackup,localDate,firstTodoLink,recurringTodos,monthlyDate} from './core.mjs?v=88-packing-edit-fix';
+const APP_BUILD='88-packing-edit-fix';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 function photoErrorAction(image){const parent=image.parentElement;if(!parent||parent.querySelector(':scope > .photo-error-retry'))return;parent.classList.add('photo-error-host');const retry=document.createElement('span');retry.className='photo-error-retry';retry.tabIndex=0;retry.setAttribute('role','button');retry.textContent='Photo failed · Retry';const reload=event=>{event.preventDefault();event.stopPropagation();retry.remove();image.classList.remove('photo-load-settled','photo-load-error');const source=image.currentSrc||image.src;image.removeAttribute('src');requestAnimationFrame(()=>{image.src=source})};retry.addEventListener('click',reload);retry.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();reload(event)}});parent.append(retry)}
 function settlePhotoLoad(event){const image=event.target;if(!(image instanceof HTMLImageElement))return;if(event instanceof Event&&event.type==='load'&&!image.classList.contains('photo-load-settled')&&!reducedMotion()&&!inViewTransition())image.animate?.([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});image.classList.add('photo-load-settled');image.classList.toggle('photo-load-error',event.type==='error');if(event.type==='error')photoErrorAction(image);else{image.parentElement?.querySelector(':scope > .photo-error-retry')?.remove();image.parentElement?.classList.remove('photo-error-host')}}
@@ -94,7 +94,7 @@ let freshCategoryPage=false;
 function commitList(markup){const list=$('#list'),fresh=freshCategoryPage;freshCategoryPage=false;if(!categorySwipe||!list.hasPointerCapture?.(categorySwipe.pointerId)){const activePage=categoryPageRoot(list),adjacentPage=list.querySelector(':scope > .category-page-adjacent'),settling=(activePage!==list&&activePage.getAnimations?.().length)||adjacentPage?.getAnimations?.().length;if(!settling){if(activePage!==list){activePage.style.transform='';activePage.style.willChange=''}adjacentPage?.remove();list.classList.remove('category-paging');categorySwipe=null}}const output=usesCategoryPages()?`<div class="category-page-current">${markup}</div>`:markup,changed=output!==listMarkup;if(changed){const oldRoot=categoryPageRoot(list),animate=tab!=='todos'&&!!list.animate&&!document.hidden&&!reducedMotion()&&!inViewTransition()&&!!list.offsetParent&&oldRoot.children.length<=300,before=animate?(fresh?new Map():new Map([...oldRoot.children].map(node=>[node,node.getBoundingClientRect().top]))):null;const template=document.createElement('template');template.innerHTML=output;patchListChildren(list,template.content);listMarkup=output;if(before&&loaded)animateListChanges(categoryPageRoot(list),before)}syncSelectedListRow();return changed}
 // Legacy photos are ids into dailyPhotos, on the record itself or on reference items (home items, photo guides).
 const usesLegacyPhoto=r=>[r,...Object.values(r).flatMap(v=>Array.isArray(v)?v:[])].some(item=>Array.isArray(item?.photos)&&item.photos.some(photo=>typeof photo==='string'));
-async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=87-packing-row-fix');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
+async function initCloud(){if(cloud)return cloud;if(cloudPromise)return cloudPromise;cloudPromise=(async()=>{try{const {connect}=await import('./cloud.js?v=88-packing-edit-fix');const config=DEFAULT_CONFIG;cloud=await connect(config,trusted,{auth(u){user=u;photoWatch=false;if(!u){records=[];photos.clear();authGate();return}$('#gate').hidden=true;$('#app').hidden=false;loaded=false;photoLoaded=false;render();},snapshot(name,data,metadata){lastSyncError='';if(name==='records'){records=data;applyOps(failedOps);loaded=true;if(pendingShortcut)openShortcut();if(!photoWatch&&records.some(usesLegacyPhoto)){photoWatch=cloud?(cloud.watchPhotos?cloud.watchPhotos():true):false;if(photoWatch)photoLoaded=false}if(!photoWatch)photoLoaded=true;if(metadata.hasPendingWrites)lastSyncError=navigator.onLine?'Changes queued · waiting for Firebase':'Offline · changes queued';else if(metadata.fromCache)lastSyncError=navigator.onLine?'Showing saved copy · connecting…':'Offline · saved copy'}else{photos=new Map(data.map(p=>[p.id,p]));applyOps(failedOps);photoLoaded=true}scheduleRender({list:true,detail:true,status:true})},error(message){lastSyncError=message;$('#gateStatus').textContent=message;scheduleRender({status:true});if(user)toast(message)}});return cloud}catch(err){cloudPromise=null;$('#gateStatus').textContent='Could not connect to Red Ridge. Check your connection and try again.';throw err}})();return cloudPromise}
 async function signIn(){$('#signIn').disabled=true;try{const c=await initCloud();await c.signIn()}catch(err){$('#gateStatus').textContent=err.code==='auth/unauthorized-domain'?'Add snowsences.github.io to Firebase Authentication → Authorized domains.':`Sign-in did not finish. ${err.code||'Check your connection and try again.'}`}finally{$('#signIn').disabled=false}}
 $('#signIn').onclick=signIn;
 const opKey=op=>`${op.collection||'records'}:${op.id}`;
@@ -213,8 +213,8 @@ function legacyPackingTemplateItems(note){const source=Array.isArray(note?.packi
 function packingItems(note){const source=Array.isArray(note?.packingItems)?note.packingItems:legacyPackingTemplateItems(note);return source.map(item=>({id:item.id||crypto.randomUUID(),title:String(item.title||'').trim(),done:!!item.done})).filter(item=>item.title)}
 function packingItemMarkup(item){return `<li class="packing-trip-wrap ${item.done?'done':''}" data-packing-item-id="${e(item.id)}"><div class="underlay complete"><span>✓ ${item.done?'Restore':'Complete'}</span></div><div class="underlay delete"><span>Delete ×</span></div><div class="packing-trip-row" tabindex="0" role="button" aria-label="Edit ${e(item.title)}"><strong data-text="${e(item.title)}">${e(item.title)}</strong></div></li>`}
 function packingHubMarkup(note){
- const items=packingItems(note).sort((a,b)=>Number(a.done)-Number(b.done)||packingAlpha(a,b)),hideCompleted=note.packingHideCompleted!==false,visible=hideCompleted?items.filter(item=>!item.done):items,doneCount=items.filter(item=>item.done).length;
- return `<div class="hub-panel packing-panel"><div class="packing-trip-toolbar"><label class="check"><input type="checkbox" id="packingHideCompleted" ${hideCompleted?'checked':''}>Hide Completed</label><div><button class="secondary" id="addPackingItem">Add item</button><button class="ghost" id="resetPackingList">Reset</button></div></div><p class="small packing-trip-progress">${doneCount} of ${items.length} completed</p><ul class="packing-trip-list" id="packingItemList">${visible.map(packingItemMarkup).join('')}</ul>${visible.length?'':`<div class="hub-empty"><h3>${items.length?'Everything is completed.':'Your packing list is empty.'}</h3><p>${items.length?'Turn off Hide Completed to review or restore items.':'Add the first item to your packing list.'}</p></div>`}</div>`;
+ const items=packingItems(note).sort((a,b)=>Number(a.done)-Number(b.done)||packingAlpha(a,b)),doneCount=items.filter(item=>item.done).length;
+ return `<div class="hub-panel packing-panel"><div class="packing-trip-toolbar"><button class="secondary" id="addPackingItem">Add item</button><button class="ghost" id="resetPackingList">Reset</button></div><p class="small packing-trip-progress">${doneCount} of ${items.length} completed</p><ul class="packing-trip-list" id="packingItemList">${items.map(packingItemMarkup).join('')}</ul>${items.length?'':'<div class="hub-empty"><h3>Your packing list is empty.</h3><p>Add the first item to your packing list.</p></div>'}</div>`;
 }
 function photographyHubMarkup(note){const guides=hubArray(note,'photoGuides'),state=hubState(note);if(!guides.length){state.tab='';return '<div class="hub-panel"><div class="hub-empty"><h3>Add a photography guide.</h3><p>Create a tab for a custom mode, technique, or field reference.</p></div></div>'}const tabs=hubTabs(note,guides.map(guide=>[`guide:${guide.id}`,guide.title||'Untitled guide'])),guide=guides.find(item=>`guide:${item.id}`===state.tab)||guides[0],equipment=[guide.camera,guide.lens].filter(Boolean).join(' · ');return `${tabs}<div class="hub-panel photography-guide-panel">${hubPhotos(guide.photos,guide.id)}<div class="photography-guide-content"><p class="hub-kicker">${e(equipment||'Photography guide')}</p><h3>${e(guide.title||'Untitled guide')}</h3>${guide.settings?.length?`<dl class="hub-facts">${guide.settings.map(setting=>`<div><dt>${e(setting.label)}</dt><dd>${e(setting.value)}</dd></div>`).join('')}</dl>`:''}${hubRich(guide.body)}<div class="hub-card-actions"><button class="ghost" data-hub-action="edit-photo-guide" data-item-id="${e(guide.id)}">Edit guide</button><button class="danger text-button" data-hub-action="delete-photo-guide" data-item-id="${e(guide.id)}">Delete guide</button></div></div></div>`}
 function renderNoteHub(note){const kind=noteKind(note);return `<p class="sub">${e(noteCategory(note))} · ${e(noteUpdatedLabel(note))}</p><div class="note-hub" data-hub-kind="${e(kind)}">${kind==='homeManual'?homeHubMarkup(note):kind==='packing'?packingHubMarkup(note):photographyHubMarkup(note)}</div>`}
@@ -317,19 +317,53 @@ function packingNoteUpdate(note,changes){const next={...note,...changes,title:NO
 // the caller's own changes don't already include one (e.g. just toggling Hide Completed) — or a
 // still-legacy-shaped note loses its items outright: they were never written to packingItems, and
 // the fields they used to live in have just been deleted.
-async function savePackingNote(note,changes,message=''){const next=packingNoteUpdate(note,{packingItems:packingItems(note),...changes});await save(next,{waitForServer:navigator.onLine});selected=note.id;renderList();renderDetail();if(message)toast(message);return next}
+// Any packing save fully re-renders the list, which would otherwise silently discard whatever
+// anyone was mid-typing in a DIFFERENT row's inline editor (not just the row actually being
+// saved). Snapshot every other row still in edit mode first and reopen them afterward, with
+// their typed-but-unsaved text intact, so saving one row never affects any other.
+function packingEditSnapshot(exceptWrap){return [...$$('#packingItemList .packing-trip-wrap.editing')].filter(wrap=>wrap!==exceptWrap).map(wrap=>({id:wrap.dataset.packingItemId,value:wrap.querySelector('.packing-item-input')?.value??''}))}
+function restorePackingEdits(note,snapshot){
+ for(const entry of snapshot){
+  const existing=packingItems(note).find(item=>item.id===entry.id),isNew=!existing;
+  let wrap=packingRowById(entry.id);
+  if(!wrap){if(!isNew)continue;wrap=insertBlankPackingRow({id:entry.id,title:'',done:false})}
+  if(wrap)openPackingEditUI(wrap,note,existing||{id:entry.id,title:'',done:false},isNew,entry.value);
+ }
+}
+async function savePackingNote(note,changes,message='',exceptWrap=null){
+ const editing=packingEditSnapshot(exceptWrap);
+ const next=packingNoteUpdate(note,{packingItems:packingItems(note),...changes});
+ await save(next,{waitForServer:navigator.onLine});
+ // persist() schedules its own render via requestAnimationFrame; left alone it would fire after
+ // ours below and wipe out the restored edits with no knowledge of them. Cancel it so there's
+ // only the one render+restore cycle here.
+ if(renderFrame){cancelAnimationFrame(renderFrame);renderFrame=0;renderFlags={list:false,detail:false,status:false}}
+ selected=note.id;renderList();renderDetail();
+ if(message)toast(message);
+ if(editing.length)restorePackingEdits(next,editing);
+ return next;
+}
 function capturePackingLayout(){const positions=new Map(),states=new Map();for(const row of $$('#detail .packing-trip-wrap[data-packing-item-id]')){positions.set(row.dataset.packingItemId,row.getBoundingClientRect().top);states.set(row.dataset.packingItemId,row.classList.contains('done'))}return {positions,states}}
 function animatePackingLayout(previous){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;for(const row of $$('#detail .packing-trip-wrap[data-packing-item-id]')){const id=row.dataset.packingItemId,oldTop=previous.positions.get(id),wasDone=previous.states.get(id),isDone=row.classList.contains('done'),title=row.querySelector('.packing-trip-row strong');if(wasDone===false&&isDone)title?.classList.add('strike-entering');else if(wasDone===true&&!isDone)title?.classList.add('strike-leaving');if(title?.classList.contains('strike-entering')||title?.classList.contains('strike-leaving'))setTimeout(()=>title.classList.remove('strike-entering','strike-leaving'),500);if(!row.animate)continue;const newTop=row.getBoundingClientRect().top;if(oldTop!==undefined&&Math.abs(oldTop-newTop)>.5)row.animate([{transform:`translateY(${oldTop-newTop}px)`},{transform:'translateY(0)'}],TODO_MOTION)}}
 async function setPackingItemDone(note,itemId,done){const previous=capturePackingLayout(),items=packingItems(note).map(item=>item.id===itemId?{...item,done}:item);await savePackingNote(note,{packingItems:items});requestAnimationFrame(()=>requestAnimationFrame(()=>animatePackingLayout(previous)))}
 async function deletePackingItem(note,item){const items=packingItems(note).filter(entry=>entry.id!==item.id);await savePackingNote(note,{packingItems:items},'Item deleted')}
 async function resetPackingList(note){if(!await ask('Reset packing list?','Every checked-off item will be marked not packed again.','Reset',true))return;await savePackingNote(note,{packingItems:packingItems(note).map(item=>({...item,done:false}))},'Packing list reset')}
+function packingRowById(id){return $(`#packingItemList .packing-trip-wrap[data-packing-item-id="${CSS.escape(id)}"]`)}
+function insertBlankPackingRow(item){
+ const list=$('#packingItemList');if(!list)return null;
+ $('#detail .packing-panel .hub-empty')?.remove();
+ list.insertAdjacentHTML('afterbegin',packingItemMarkup(item));
+ return list.firstElementChild;
+}
 // Tapping a row's label swaps it for an inline input + Save, in place, without a full re-render.
 // Saving an existing item with a blank name reverts to its prior title; saving a brand-new one
 // (added via Add Item, not yet persisted) defaults to "Item" instead, since it has no prior title.
-function enterPackingItemEdit(wrap,note,item,isNew){
+// initialValue lets restorePackingEdits reopen a row with whatever was already typed rather than
+// always starting from the item's saved title (or blank, for a still-unsaved new row).
+function openPackingEditUI(wrap,note,item,isNew,initialValue){
  wrap.classList.add('editing');
  const row=wrap.querySelector('.packing-trip-row');
- row.innerHTML=`<input class="packing-item-input" value="${e(isNew?'':item.title)}" maxlength="300" placeholder="Item name" aria-label="Item name"><button type="button" class="secondary packing-item-save">Save</button>`;
+ row.innerHTML=`<input class="packing-item-input" value="${e(initialValue)}" maxlength="300" placeholder="Item name" aria-label="Item name"><button type="button" class="secondary packing-item-save">Save</button>`;
  const input=row.querySelector('.packing-item-input'),saveButton=row.querySelector('.packing-item-save');
  input.focus();input.select();
  let done=false;
@@ -339,17 +373,15 @@ function enterPackingItemEdit(wrap,note,item,isNew){
   if(!title&&!isNew){wrap.classList.remove('editing');row.innerHTML=`<strong data-text="${e(item.title)}">${e(item.title)}</strong>`;return}
   done=true;saveButton.disabled=true;
   const finalTitle=title||'Item',items=isNew?[...packingItems(note),{...item,title:finalTitle}]:packingItems(note).map(entry=>entry.id===item.id?{...entry,title:finalTitle}:entry);
-  await savePackingNote(note,{packingItems:items},isNew?'Item added':'Item updated');
+  await savePackingNote(note,{packingItems:items},isNew?'Item added':'Item updated',wrap);
  };
  saveButton.onclick=commit;
  input.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();commit()}};
 }
+function enterPackingItemEdit(wrap,note,item,isNew){openPackingEditUI(wrap,note,item,isNew,isNew?'':item.title)}
 function addPackingItem(note){
- const list=$('#packingItemList');if(!list)return;
- $('#detail .packing-panel .hub-empty')?.remove();
- const item={id:crypto.randomUUID(),title:'',done:false};
- list.insertAdjacentHTML('afterbegin',packingItemMarkup(item));
- enterPackingItemEdit(list.firstElementChild,note,item,true);
+ const item={id:crypto.randomUUID(),title:'',done:false},wrap=insertBlankPackingRow(item);
+ if(wrap)enterPackingItemEdit(wrap,note,item,true);
 }
 function bindPackingRowGestures(wrap,note){
  const row=wrap.querySelector('.packing-trip-row');
@@ -375,7 +407,6 @@ function bindPackingRowGestures(wrap,note){
 }
 function bindPackingSwipes(note){$$('#detail .packing-trip-wrap').forEach(wrap=>bindPackingRowGestures(wrap,note))}
 function bindPackingListControls(note){
- $('#packingHideCompleted')?.addEventListener('change',event=>savePackingNote(note,{packingHideCompleted:event.target.checked}));
  $('#addPackingItem')?.addEventListener('click',()=>addPackingItem(note));
  $('#resetPackingList')?.addEventListener('click',()=>resetPackingList(note));
 }
