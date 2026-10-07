@@ -120,6 +120,22 @@ main[data-tab=cars] .section-label{grid-column:1/-1;background:none;border-top:1
 .rich-editor li,.rich-reading li{margin:.2em 0}
 .rich-editor b,.rich-editor strong,.rich-reading b,.rich-reading strong{font-weight:600}
 .rich-reading{white-space:pre-wrap!important}
+.note-editor-content{min-height:0;background:#162a35}
+.note-editor-content .rich-field{height:100%;margin:0}
+.note-editor-content .rich-field>label{display:none}
+.note-editor-content .rich-editor{height:100%;min-height:100%;max-height:none;overflow:auto;border:0;border-radius:0;background:transparent;padding:0}
+@media (min-width:681px){
+ .editor.note-editor{width:min(1080px,calc(100% - 48px));height:min(760px,calc(100dvh - 48px));max-height:calc(100dvh - 48px)}
+ .note-editor-form{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;width:100%;height:100%;max-height:none!important}
+ .note-editor-form>.modal-head{grid-column:1;grid-row:1}
+ .note-editor-form>.note-editor-meta{grid-column:1;grid-row:2;min-height:0}
+ .note-editor-form>.note-editor-content{grid-column:2;grid-row:1/4;border-left:1px solid var(--line)}
+ .note-editor-form>.form-actions{grid-column:1;grid-row:3;position:static}
+}
+@media (max-width:680px){
+ .note-editor-form>.note-editor-meta{flex:none}
+ .note-editor-form>.note-editor-content{flex:1;min-height:180px}
+}
 .setting-card>h3{margin:4px 0 12px;font-size:16px;letter-spacing:0;color:var(--ink)}
 .setting-reminders{border-top:1px solid var(--line)}
 .setting-reminder{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
