@@ -1,0 +1,10 @@
+{
+ "manifest_version":3,"name":"Red Ridge Clipper","version":"1.0.0",
+ "description":"Edit selected text and send it directly to Red Ridge Notes.",
+ "minimum_chrome_version":"120",
+ "permissions":["activeTab","contextMenus","scripting","storage"],
+ "host_permissions":["https://snowsences.github.io/red-ridge/*"],
+ "background":{"service_worker":"background.js"},
+ "action":{"default_title":"Clip text to Red Ridge"},
+ "icons":{"48":"icon-48.png","128":"icon-128.png"}
+}

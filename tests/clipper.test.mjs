@@ -1,0 +1,23 @@
+import {createNoteClipper} from '../note-clipper.mjs';
+import {linkify} from '../core.mjs';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
+Object.defineProperty(globalThis.navigator,'onLine',{value:true,configurable:true});
+let ready=true,fail=false,writes=[],records=new Map(),shown=[],release;
+const api=createNoteClipper({ready:()=>({ready,message:'Sign in first'}),categories:()=>['Research'],get:id=>records.get(id),save:async n=>{writes.push(n);records.set(n.id,n);if(fail)throw Error('Rejected');if(release)await release.promise},show:n=>shown.push(n)});
+const note={id:'clip_'+crypto.randomUUID(),title:' Test ',body:'Line one\n<img src=x onerror=alert(1)>\n\nSource: https://example.com',category:'research'};
+await api.save(note);assert.equal(writes[0].category,'Research');assert.equal(writes[0].title,'Test');assert.equal(writes[0].richText,false);assert.equal(writes[0].body,note.body);assert(linkify(note.body).includes('&lt;img'));assert.equal(shown.length,1);
+ready=false;await assert.rejects(api.save(note),/Sign in/);ready=true;
+const count=writes.length;for(const data of [{...note,id:'oops'},{...note,title:''},{...note,body:'a'.repeat(20001)},{...note,category:'a'.repeat(101)}])await assert.rejects(api.save(data));assert.equal(writes.length,count);
+fail=true;const retry={...note,id:'clip_'+crypto.randomUUID()};await assert.rejects(api.save(retry),/Rejected/);fail=false;await api.save({...retry,body:'Edited after failure'});assert.equal(writes.at(-1).id,writes.at(-2).id);assert.equal(writes.at(-1).body,'Edited after failure');assert.equal(records.size,2);
+let unblock;release={promise:new Promise(r=>unblock=r)};const start=writes.length,p1=api.save(note),p2=api.save(note);unblock();await Promise.all([p1,p2]);assert.equal(writes.length,start+1);release=null;
+Object.defineProperty(globalThis.navigator,'onLine',{value:false,configurable:true});await assert.rejects(api.save(note),/internet/);Object.defineProperty(globalThis.navigator,'onLine',{value:true,configurable:true});
+// Exercise extension background handlers using the real MAIN-world bridge with mocked Chrome transport.
+const storage={},handlers={},opened=[];let saved;
+const chrome={storage:{local:{set:async obj=>Object.assign(storage,obj),get:async()=>storage}},runtime:{id:'test',getURL:p=>'chrome-extension://test/'+p,onInstalled:{addListener:f=>handlers.install=f},onMessage:{addListener:f=>handlers.message=f}},contextMenus:{removeAll:f=>f(),create:o=>handlers.menu=o,onClicked:{addListener:f=>handlers.click=f}},action:{onClicked:{addListener:f=>handlers.action=f}},windows:{create:async o=>opened.push(o)},tabs:{query:async()=>[{id:10}],create:async()=>({id:10}),update:async()=>{}},scripting:{executeScript:async({func,args})=>[{result:await func(...args)}]}};
+const sandbox={chrome,crypto,console,setTimeout,window:{redRidgeClipper:api}};vm.createContext(sandbox);vm.runInContext(await readFile(new URL('../extensions/red-ridge-clipper/background.js',import.meta.url),'utf8'),sandbox);handlers.install();assert.equal(handlers.menu.contexts[0],'selection');
+await vm.runInContext("openEditor('Selected text','https://example.com','Source title')",sandbox);assert.equal(opened.length,1);assert.equal(Object.values(storage)[0].text,'Selected text');await vm.runInContext("openEditor('','','',true)",sandbox);assert.equal(opened[1].url,opened[0].url);
+const send=message=>new Promise(resolve=>handlers.message(message,{id:'test',url:'chrome-extension://test/editor.html?draft=a'},resolve));const categories=await send({type:'categories'});assert(categories.ok);assert(categories.categories.includes('Research'));const result=await send({type:'send',note:{...note,id:'clip_'+crypto.randomUUID(),category:'New category'}});assert(result.ok);assert.equal(writes.at(-1).category,'New category');
+assert.equal(handlers.message({type:'send'},{id:'other',url:'https://evil.example'},()=>{throw Error('Bad sender accepted')}),undefined);
+console.log('PASS: selection capture, saved-draft reopening, category loading and matching, new categories, actual bridge save, plain-text escaping, validation, sign-in/offline errors, failed-save editing, concurrent deduplication, and sender validation.');
