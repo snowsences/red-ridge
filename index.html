@@ -1,10 +1,52 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17242d"><meta name="description" content="Red Ridge — your recipes, notes, cars and to-dos."><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://apis.google.com https://www.gstatic.com https://www.google.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://api.cloudinary.com https://res.cloudinary.com https://red-ridge-upload-signer.allenkevinc.workers.dev; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; media-src 'none'; form-action 'self'"><title>Red Ridge</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" type="image/png"><link rel="apple-touch-icon" href="./icon-192.png"><link rel="stylesheet" href="./style.css?v=89-packing-save-all-edits"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17242d"><meta name="description" content="Red Ridge — your recipes, notes, cars and to-dos."><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://apis.google.com https://www.gstatic.com https://www.google.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://api.cloudinary.com https://res.cloudinary.com https://red-ridge-upload-signer.allenkevinc.workers.dev; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; media-src 'none'; form-action 'self'"><title>Red Ridge</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" type="image/png"><link rel="apple-touch-icon" href="./icon-192.png"><link rel="stylesheet" href="./style.css?v=92-image-tools"></head>
 <body>
 <div id="gate" class="gate"><div class="gate-card"><p class="wordmark">Red Ridge<span>•</span></p><h1>Your everyday,<br>kept together.</h1><p id="gateStatus">A private journal for recipes, notes, cars, and to-dos.</p><button id="signIn" class="primary">Sign in with Google</button></div></div>
 <div id="app" hidden>
 <header class="desktop-header"><button class="wordmark" id="home">Red Ridge<span>•</span></button><nav id="nav" aria-label="Main navigation"></nav><button id="add" class="add-button" aria-label="Add entry">+</button></header>
-<main><div id="tools" class="tools"></div><div id="workspace" class="workspace"><section id="list" aria-label="Entries"></section><aside id="detail" class="detail" aria-label="Entry details"></aside></div><div id="settings" hidden></div></main><footer id="syncFooter" class="sync-footer"><span id="syncStatus" role="status">Connecting…</span></footer>
+<main><div id="tools" class="tools"></div><div id="workspace" class="workspace"><section id="list" aria-label="Entries"></section><aside id="detail" class="detail" aria-label="Entry details"></aside></div>
+<section id="image-tools" aria-labelledby="image-tools-title" hidden>
+  <header class="resize-header">
+    <div><p class="resize-kicker">TOOLS</p><h1 id="image-tools-title">Bulk image resizer</h1><p>Resize a batch of photos and download the results together.</p></div>
+    <span class="resize-private"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M9 10V7a3 3 0 1 1 6 0v3m-3 4v2"/></svg> On-device processing</span>
+  </header>
+  <div class="resize-layout">
+    <div class="resize-files">
+      <div class="resize-drop" id="resize-drop">
+        <span class="resize-upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></span>
+        <h2>Drop images here</h2><p>JPG, PNG, and WebP</p>
+        <button type="button" class="secondary" id="resize-browse">Choose images</button>
+        <input type="file" id="resize-files" multiple accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden>
+      </div>
+      <section class="resize-queue" aria-labelledby="resize-queue-title">
+        <div class="resize-queue-head"><h2 id="resize-queue-title">Image queue <span id="resize-count">0</span></h2><button type="button" class="text-button" id="resize-clear" hidden>Clear all</button></div>
+        <p class="resize-empty" id="resize-empty">Add images to preview their new dimensions.</p>
+        <ul id="resize-queue" hidden></ul>
+      </section>
+    </div>
+    <form id="resize-form" class="resize-form">
+      <h2>Resize settings</h2>
+      <fieldset>
+        <legend>Resize method</legend>
+        <div class="resize-modes"><label><input type="radio" name="method" value="fit" checked><span>Fit within</span></label><label><input type="radio" name="method" value="percent"><span>By percentage</span></label></div>
+      </fieldset>
+      <div id="resize-fit">
+        <div class="resize-dimensions"><label>Max width (px)<input type="number" name="width" min="1" max="8192" value="1600" required></label><label>Max height (px)<input type="number" name="height" min="1" max="8192" value="1600" required></label></div>
+        <p class="resize-hint">Keeps the original proportions.</p>
+        <label class="check"><input type="checkbox" name="noUpscale" checked>Don’t enlarge smaller images</label>
+      </div>
+      <label id="resize-scale" hidden>Scale (%)<input type="number" name="percent" min="1" max="1000" value="50" required disabled></label>
+      <label>Output format<select name="format"><option value="original">Keep original</option><option value="image/jpeg">JPEG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select></label>
+      <div id="resize-quality">
+        <label class="resize-quality-label" for="resize-quality-input">Quality <output id="resize-quality-value" for="resize-quality-input">85%</output></label>
+        <input type="range" id="resize-quality-input" name="quality" min="1" max="100" value="85"><p class="resize-hint">Applies to JPEG and WebP.</p>
+      </div>
+      <button type="submit" class="primary" id="resize-submit" disabled>Resize images</button>
+      <p id="resize-status" role="status">Add images to get started.</p>
+    </form>
+  </div>
+</section>
+<div id="settings" hidden></div></main><footer id="syncFooter" class="sync-footer"><span id="syncStatus" role="status">Connecting…</span></footer>
 </div>
 <dialog id="editor" class="editor"></dialog><dialog id="confirm" class="confirm"></dialog><div id="toast" class="toast" role="status"></div>
-<script type="module" src="./app.js?v=91-note-clipper"></script></body></html>
+<script type="module" src="./app.js?v=92-image-tools"></script></body></html>
