@@ -7,6 +7,7 @@ const dimensionLabel = ({ width, height }) => `${width} × ${height}`;
 const fileSize = bytes => bytes < 1_000_000 ? `${Math.max(1, Math.round(bytes / 1000))} KB` : `${(bytes / 1_000_000).toFixed(1)} MB`;
 
 function outputSize({ width, height }, settings) {
+  if (settings.method === 'original') return { width, height };
   const scale = settings.method === 'percent' ? settings.percent / 100
     : Math.min(settings.width / width, settings.height / height, settings.noUpscale ? 1 : Infinity);
   return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) };
@@ -33,7 +34,19 @@ async function decode(file) {
   }
 }
 
-async function encode(source, { width, height }, type, quality) {
+function drawWatermark(context, { width, height }, { image, corner, padding }) {
+  const availableWidth = width - padding;
+  const availableHeight = height - padding;
+  if (availableWidth < 1 || availableHeight < 1) throw new Error('Choose less watermark padding for this image.');
+  const scale = Math.min(1, availableWidth / image.width, availableHeight / image.height);
+  const markWidth = Math.max(1, Math.round(image.width * scale));
+  const markHeight = Math.max(1, Math.round(image.height * scale));
+  const x = corner === 'left' ? padding : availableWidth - markWidth;
+  context.drawImage(image.source, x, availableHeight - markHeight, markWidth, markHeight);
+}
+
+async function encode(source, size, type, quality, watermark) {
+  const { width, height } = size;
   if (width > 8192 || height > 8192 || width * height > 32_000_000) {
     throw new Error('Use an output of up to 8,192 px per side and 32 megapixels.');
   }
@@ -49,6 +62,7 @@ async function encode(source, { width, height }, type, quality) {
     }
     context.imageSmoothingQuality = 'high';
     context.drawImage(source, 0, 0, width, height);
+    if (watermark) drawWatermark(context, size, watermark);
     const blob = await new Promise(resolve => canvas.toBlob(resolve, type, quality));
     if (!blob || blob.type !== type) throw new Error('Your browser could not save this format. Try PNG or JPEG.');
     return blob;
@@ -116,26 +130,43 @@ export function setupImageResizer(root) {
   const fields = form.elements;
   const items = [];
   let busy = '', message = '';
+  let watermark = null, watermarkError = '';
+
+  function invalidateResults() {
+    for (const item of items) discardResult(item);
+    message = '';
+  }
 
   function settings() {
     const method = fields.method.value;
-    const required = method === 'fit' ? [fields.width, fields.height] : [fields.percent];
+    const required = method === 'fit' ? [fields.width, fields.height] : method === 'percent' ? [fields.percent] : [];
     if (required.some(input => !input.validity.valid)) return null;
+    const overlay = fields.addWatermark.checked && watermark
+      ? { image: watermark, corner: fields.corner.value, padding: Number(fields.padding.value) } : null;
     return { method, width: fields.width.valueAsNumber, height: fields.height.valueAsNumber,
-      percent: fields.percent.valueAsNumber, noUpscale: fields.noUpscale.checked, format: fields.format.value, quality: fields.quality.valueAsNumber / 100 };
+      percent: fields.percent.valueAsNumber, noUpscale: fields.noUpscale.checked, format: fields.format.value,
+      quality: fields.quality.valueAsNumber / 100, overlay };
   }
 
   function render() {
     const fit = fields.method.value === 'fit';
+    const percent = fields.method.value === 'percent';
+    const wantsWatermark = fields.addWatermark.checked;
     get('fit').hidden = !fit;
-    get('scale').hidden = fit;
+    get('scale').hidden = !percent;
     get('quality').hidden = fields.format.value === 'image/png';
     get('quality-value').value = `${fields.quality.value}%`;
+    get('watermark-options').hidden = !wantsWatermark;
+    const markStatus = get('watermark-status');
+    const markMessage = watermarkError || (watermark ? `${watermark.name} · ${dimensionLabel(watermark)} px` : 'Choose a transparent PNG.');
+    if (markStatus.textContent !== markMessage) markStatus.textContent = markMessage;
+    markStatus.toggleAttribute('data-error', Boolean(watermarkError));
     for (const input of fields) input.disabled = Boolean(busy);
     fields.width.disabled ||= !fit;
     fields.height.disabled ||= !fit;
-    fields.percent.disabled ||= fit;
+    fields.percent.disabled ||= !percent;
     fields.quality.disabled ||= get('quality').hidden;
+    for (const field of [fields.watermarkFile, fields.corner, fields.padding]) field.disabled ||= !wantsWatermark;
     picker.disabled = browse.disabled = clear.disabled = Boolean(busy);
     const current = settings();
     const ready = items.filter(item => item.width).length;
@@ -146,10 +177,33 @@ export function setupImageResizer(root) {
     get('empty').hidden = Boolean(items.length);
     queue.scrollTop = top;
     get('count').textContent = items.length;
-    submit.disabled = Boolean(busy) || !ready || !current;
-    submit.textContent = busy || (done ? 'Download ZIP' : ready ? `Resize ${countImages(ready)}` : 'Resize images');
-    const nextStatus = message || (ready ? (current ? `${countImages(ready)} ready to resize.` : 'Enter valid resize dimensions.') : 'Add images to get started.');
+    const needsWatermark = wantsWatermark && !watermark;
+    const action = wantsWatermark ? 'Watermark' : (fit || percent ? 'Resize' : 'Export');
+    submit.disabled = Boolean(busy) || !ready || !current || needsWatermark;
+    submit.textContent = busy || (done ? 'Download ZIP' : `${action} ${ready ? countImages(ready) : 'images'}`);
+    const nextStatus = message || (needsWatermark ? 'Choose a PNG watermark to continue.' : ready
+      ? (current ? `${countImages(ready)} ready.` : 'Enter valid resize dimensions.') : 'Add images to get started.');
     if (status.textContent !== nextStatus) status.textContent = nextStatus;
+  }
+
+  async function loadWatermark(file) {
+    if (busy || !file) return;
+    busy = 'Reading watermark…';
+    watermarkError = '';
+    watermark?.release();
+    watermark = null;
+    invalidateResults();
+    render();
+    try {
+      const signature = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+      if (signature.join(',') !== '137,80,78,71,13,10,26,10') throw new Error('format');
+      watermark = { ...await decode(file), name: file.name };
+    } catch {
+      watermarkError = 'This file could not be opened as a PNG.';
+    } finally {
+      busy = '';
+      render();
+    }
   }
 
   async function add(files) {
@@ -169,11 +223,12 @@ export function setupImageResizer(root) {
     if (item.thumb) URL.revokeObjectURL(item.thumb);
   }
 
-  async function resize(config) {
+  async function processBatch(config) {
     const ready = items.filter(item => item.width);
     const used = new Set();
-    busy = 'Resizing…';
-    message = `Resizing 0 of ${ready.length}…`;
+    const activity = config.overlay || config.method === 'original' ? 'Processing' : 'Resizing';
+    busy = `${activity}…`;
+    message = `${activity} 0 of ${ready.length}…`;
     render();
     for (const [index, item] of ready.entries()) {
       let image;
@@ -182,18 +237,18 @@ export function setupImageResizer(root) {
         image = await decode(item.file);
         const size = outputSize(item, config);
         const type = config.format === 'original' ? item.type : config.format;
-        const blob = await encode(image.source, size, type, config.quality);
+        const blob = await encode(image.source, size, type, config.quality, config.overlay);
         item.result = { name: outputName(item.file, size, type, used), blob, url: URL.createObjectURL(blob) };
       } catch (error) {
-        item.error = error.message || 'This image could not be resized.';
+        item.error = error.message || 'This image could not be processed.';
       } finally {
         image?.release();
       }
-      status.textContent = `Resized ${index + 1} of ${ready.length}…`;
+      status.textContent = `${activity} ${index + 1} of ${ready.length}…`;
     }
     const done = ready.filter(item => item.result).length;
     const skipped = items.length - done;
-    message = done ? `${countImages(done)} ready to download.${skipped ? ` ${skipped} skipped.` : ''}` : 'No images could be resized. Check the queue.';
+    message = done ? `${countImages(done)} ready to download.${skipped ? ` ${skipped} skipped.` : ''}` : 'No images could be processed. Check the queue.';
     busy = '';
     render();
   }
@@ -210,7 +265,7 @@ export function setupImageResizer(root) {
       const url = URL.createObjectURL(archive);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'red-ridge-resized-images.zip';
+      link.download = fields.addWatermark.checked ? 'red-ridge-watermarked-images.zip' : 'red-ridge-resized-images.zip';
       document.body.append(link);
       link.click();
       link.remove();
@@ -225,6 +280,11 @@ export function setupImageResizer(root) {
   }
 
   browse.addEventListener('click', () => picker.click());
+  fields.watermarkFile.addEventListener('change', () => {
+    const [file] = fields.watermarkFile.files;
+    fields.watermarkFile.value = '';
+    loadWatermark(file);
+  });
   picker.addEventListener('change', () => {
     const files = Array.from(picker.files);
     picker.value = '';
@@ -259,10 +319,9 @@ export function setupImageResizer(root) {
     render();
     (queue.querySelector(`[data-remove="${Math.min(index, items.length - 1)}"]`) || browse).focus({ preventScroll: true });
   });
-  form.addEventListener('input', () => {
-    if (busy) return;
-    for (const item of items) discardResult(item);
-    message = '';
+  form.addEventListener('input', event => {
+    if (busy || event.target === fields.watermarkFile) return;
+    invalidateResults();
     render();
   });
   form.addEventListener('submit', event => {
@@ -272,7 +331,7 @@ export function setupImageResizer(root) {
     if (results.length) downloadZip(results);
     else {
       const config = settings();
-      if (config) resize(config);
+      if (config && (!fields.addWatermark.checked || config.overlay)) processBatch(config);
     }
   });
   render();

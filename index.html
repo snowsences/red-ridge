@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17242d"><meta name="description" content="Red Ridge — your recipes, notes, cars and to-dos."><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://apis.google.com https://www.gstatic.com https://www.google.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://api.cloudinary.com https://res.cloudinary.com https://red-ridge-upload-signer.allenkevinc.workers.dev; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; media-src 'none'; form-action 'self'"><title>Red Ridge</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" type="image/png"><link rel="apple-touch-icon" href="./icon-192.png"><link rel="stylesheet" href="./style.css?v=92-image-tools"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17242d"><meta name="description" content="Red Ridge — your recipes, notes, cars and to-dos."><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://apis.google.com https://www.gstatic.com https://www.google.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://api.cloudinary.com https://res.cloudinary.com https://red-ridge-upload-signer.allenkevinc.workers.dev; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; media-src 'none'; form-action 'self'"><title>Red Ridge</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" type="image/png"><link rel="apple-touch-icon" href="./icon-192.png"><link rel="stylesheet" href="./style.css?v=93-watermark"></head>
 <body>
 <div id="gate" class="gate"><div class="gate-card"><p class="wordmark">Red Ridge<span>•</span></p><h1>Your everyday,<br>kept together.</h1><p id="gateStatus">A private journal for recipes, notes, cars, and to-dos.</p><button id="signIn" class="primary">Sign in with Google</button></div></div>
 <div id="app" hidden>
@@ -7,7 +7,7 @@
 <main><div id="tools" class="tools"></div><div id="workspace" class="workspace"><section id="list" aria-label="Entries"></section><aside id="detail" class="detail" aria-label="Entry details"></aside></div>
 <section id="image-tools" aria-labelledby="image-tools-title" hidden>
   <header class="resize-header">
-    <div><p class="resize-kicker">TOOLS</p><h1 id="image-tools-title">Bulk image resizer</h1><p>Resize a batch of photos and download the results together.</p></div>
+    <div><p class="resize-kicker">TOOLS</p><h1 id="image-tools-title">Bulk image resizer</h1><p>Resize, convert, or watermark a batch of images.</p></div>
     <span class="resize-private"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M9 10V7a3 3 0 1 1 6 0v3m-3 4v2"/></svg> On-device processing</span>
   </header>
   <div class="resize-layout">
@@ -28,7 +28,7 @@
       <h2>Resize settings</h2>
       <fieldset>
         <legend>Resize method</legend>
-        <div class="resize-modes"><label><input type="radio" name="method" value="fit" checked><span>Fit within</span></label><label><input type="radio" name="method" value="percent"><span>By percentage</span></label></div>
+        <div class="resize-modes"><label><input type="radio" name="method" value="fit" checked><span>Fit within</span></label><label><input type="radio" name="method" value="percent"><span>By percentage</span></label><label><input type="radio" name="method" value="original"><span>Original size</span></label></div>
       </fieldset>
       <div id="resize-fit">
         <div class="resize-dimensions"><label>Max width (px)<input type="number" name="width" min="1" max="8192" value="1600" required></label><label>Max height (px)<input type="number" name="height" min="1" max="8192" value="1600" required></label></div>
@@ -41,6 +41,18 @@
         <label class="resize-quality-label" for="resize-quality-input">Quality <output id="resize-quality-value" for="resize-quality-input">85%</output></label>
         <input type="range" id="resize-quality-input" name="quality" min="1" max="100" value="85"><p class="resize-hint">Applies to JPEG and WebP.</p>
       </div>
+      <div class="resize-watermark">
+        <label class="check"><input type="checkbox" name="addWatermark" aria-controls="resize-watermark-options">Add watermark</label>
+        <div id="resize-watermark-options" hidden>
+          <label class="resize-watermark-upload">Watermark PNG<input type="file" id="resize-watermark-file" name="watermarkFile" accept="image/png,.png" disabled></label>
+          <p class="resize-hint" id="resize-watermark-status" role="status">Choose a transparent PNG.</p>
+          <div class="resize-dimensions">
+            <label>Corner<select name="corner" disabled><option value="right">Bottom right</option><option value="left">Bottom left</option></select></label>
+            <label>Padding<select name="padding" disabled><option value="0">0 px</option><option value="15" selected>15 px</option><option value="30">30 px</option></select></label>
+          </div>
+          <p class="resize-hint">For watermark only, use Original size and Keep original.</p>
+        </div>
+      </div>
       <button type="submit" class="primary" id="resize-submit" disabled>Resize images</button>
       <p id="resize-status" role="status">Add images to get started.</p>
     </form>
@@ -49,4 +61,4 @@
 <div id="settings" hidden></div></main><footer id="syncFooter" class="sync-footer"><span id="syncStatus" role="status">Connecting…</span></footer>
 </div>
 <dialog id="editor" class="editor"></dialog><dialog id="confirm" class="confirm"></dialog><div id="toast" class="toast" role="status"></div>
-<script type="module" src="./app.js?v=92-image-tools"></script></body></html>
+<script type="module" src="./app.js?v=93-watermark"></script></body></html>
