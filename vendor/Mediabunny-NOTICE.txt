@@ -1,0 +1,4 @@
+Mediabunny 1.65.2 by Vanilagy is licensed under the Mozilla Public License 2.0.
+The complete corresponding source code is available in the src directory of
+https://registry.npmjs.org/mediabunny/-/mediabunny-1.65.2.tgz
+This browser bundle uses selected exports of the unmodified npm distribution.

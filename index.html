@@ -1,11 +1,16 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17242d"><meta name="description" content="Red Ridge — your recipes, notes, cars and to-dos."><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://apis.google.com https://www.gstatic.com https://www.google.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://api.cloudinary.com https://res.cloudinary.com https://red-ridge-upload-signer.allenkevinc.workers.dev; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; media-src 'none'; form-action 'self'"><title>Red Ridge</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" type="image/png"><link rel="apple-touch-icon" href="./icon-192.png"><link rel="stylesheet" href="./style.css?v=93-watermark"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17242d"><meta name="description" content="Red Ridge — your recipes, notes, cars and to-dos."><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://apis.google.com https://www.gstatic.com https://www.google.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://api.cloudinary.com https://res.cloudinary.com https://red-ridge-upload-signer.allenkevinc.workers.dev; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; media-src 'none'; form-action 'self'"><title>Red Ridge</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" type="image/png"><link rel="apple-touch-icon" href="./icon-192.png"><link rel="stylesheet" href="./style.css?v=94-video-tools"></head>
 <body>
 <div id="gate" class="gate"><div class="gate-card"><p class="wordmark">Red Ridge<span>•</span></p><h1>Your everyday,<br>kept together.</h1><p id="gateStatus">A private journal for recipes, notes, cars, and to-dos.</p><button id="signIn" class="primary">Sign in with Google</button></div></div>
 <div id="app" hidden>
 <header class="desktop-header"><button class="wordmark" id="home">Red Ridge<span>•</span></button><nav id="nav" aria-label="Main navigation"></nav><button id="add" class="add-button" aria-label="Add entry">+</button></header>
 <main><div id="tools" class="tools"></div><div id="workspace" class="workspace"><section id="list" aria-label="Entries"></section><aside id="detail" class="detail" aria-label="Entry details"></aside></div>
-<section id="image-tools" aria-labelledby="image-tools-title" hidden>
+<div id="media-tools" hidden>
+  <div class="media-tool-switch" role="group" aria-label="Media tools">
+    <button type="button" data-media-tool="images" aria-controls="image-tools" aria-pressed="true">Images</button>
+    <button type="button" data-media-tool="videos" aria-controls="video-tools" aria-pressed="false">Videos</button>
+  </div>
+<section id="image-tools" aria-labelledby="image-tools-title">
   <header class="resize-header">
     <div><p class="resize-kicker">TOOLS</p><h1 id="image-tools-title">Bulk image resizer</h1><p>Resize, convert, or watermark a batch of images.</p></div>
     <span class="resize-private"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M9 10V7a3 3 0 1 1 6 0v3m-3 4v2"/></svg> On-device processing</span>
@@ -58,7 +63,44 @@
     </form>
   </div>
 </section>
+<section id="video-tools" aria-labelledby="video-title" hidden>
+  <header class="resize-header">
+    <div><p class="resize-kicker">TOOLS</p><h1 id="video-title">Video converter</h1><p>Shrink a batch of camera clips. Compare the sizes before downloading.</p></div>
+    <span class="resize-private">On-device processing</span>
+  </header>
+  <div class="resize-layout">
+    <div class="resize-files">
+      <div class="resize-drop" id="video-drop">
+        <span class="resize-upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3Z"/></svg></span>
+        <h2>Drop videos here</h2><p>MP4, MOV, WebM, or MKV</p>
+        <button type="button" class="secondary" id="video-browse">Choose videos</button>
+        <input type="file" id="video-files" accept=".mp4,.m4v,.mov,.webm,.mkv,video/mp4,video/quicktime,video/webm,video/x-matroska" multiple hidden>
+      </div>
+      <section class="resize-queue" aria-labelledby="video-queue-title">
+        <div class="resize-queue-head"><h2 id="video-queue-title">Video queue <span id="video-count">0</span></h2><button type="button" class="text-button" id="video-clear" hidden>Clear all</button></div>
+        <p class="resize-empty" id="video-empty">Add videos to see their original sizes and export estimates.</p>
+        <ul id="video-queue" hidden></ul>
+      </section>
+    </div>
+    <form id="video-form" class="resize-form">
+      <h2>Compression settings</h2>
+      <label>Output format<select name="codec"><option value="hevc">MP4 · H.265 (HEVC)</option><option value="avc">MP4 · H.264</option><option value="vp9">WebM · VP9</option></select></label>
+      <p class="resize-hint" id="video-codec-status" role="status">Checking available encoders…</p>
+      <label>Resolution limit<select name="resolution"><option value="720">720p</option><option value="1080" selected>1080p</option><option value="2160">4K</option><option value="0">Original resolution</option></select></label>
+      <label>Video bitrate<select name="bitrate"><option value="1.5">1.5 Mbps · Smaller file</option><option value="2.5" selected>2.5 Mbps · Balanced</option><option value="4">4 Mbps · More detail</option><option value="custom">Custom</option></select></label>
+      <label id="video-custom" hidden>Custom bitrate (Mbps)<input type="number" name="customBitrate" value="5" min="0.1" max="80" step="0.1" required disabled></label>
+      <label class="check"><input type="checkbox" name="limitFps" checked>Limit to 30 frames per second</label>
+      <label class="check"><input type="checkbox" name="mute">Remove audio</label>
+      <label class="check" id="video-folder-option" hidden><input type="checkbox" name="folder">Save directly to a folder</label>
+      <p class="resize-hint">File size varies by clip. Saved copies use new filenames.</p>
+      <p class="resize-hint" id="video-hdr-note" hidden>HDR color and brightness may change. Compare the exported clip with the original.</p>
+      <div class="video-submit-row"><button type="submit" class="primary" id="video-submit" disabled>Convert videos</button><button type="button" class="secondary" id="video-cancel" hidden>Cancel</button></div>
+      <p id="video-status" role="status">Add videos to get started.</p>
+    </form>
+  </div>
+</section>
+</div>
 <div id="settings" hidden></div></main><footer id="syncFooter" class="sync-footer"><span id="syncStatus" role="status">Connecting…</span></footer>
 </div>
 <dialog id="editor" class="editor"></dialog><dialog id="confirm" class="confirm"></dialog><div id="toast" class="toast" role="status"></div>
-<script type="module" src="./app.js?v=93-watermark"></script></body></html>
+<script type="module" src="./app.js?v=94-video-tools"></script></body></html>
