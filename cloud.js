@@ -1,6 +1,6 @@
 import {initializeApp} from './vendor/firebase-app.js';
 import {getAuth,setPersistence,browserLocalPersistence,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from './vendor/firebase-auth.js';
-import {OWNER,reconcileRecord,equalValue} from './core.mjs?v=95-reliability';
+import {OWNER,reconcileRecord,equalValue} from './core.mjs?v=96-recovery';
 // Firestore is the largest bundle; signed-out visitors never need it. A saved session starts the download
 // alongside Auth so returning users are not slowed down by loading the two one after the other.
 let firestoreModule=null;const loadFirestore=()=>firestoreModule||=import('./vendor/firebase-firestore.js');
@@ -22,14 +22,12 @@ export async function connect(config,trusted,callbacks){
  watchPhotos(){if(!photoStop&&db&&stops.length&&auth.currentUser?.uid===OWNER)photoStop=listen('photos');return !!photoStop},
  write(ops){if(auth.currentUser?.uid!==OWNER||!db)throw Error('Sign in to save.');
  const refs=ops.map(op=>fs.doc(col(op.collection||'records'),op.id));
- if(navigator.onLine)return fs.runTransaction(db,async tx=>{
+ return fs.runTransaction(db,async tx=>{
   const snapshots=await Promise.all(refs.map(ref=>tx.get(ref)));
   for(let i=0;i<ops.length;i++){const op=ops[i],remote=snapshots[i].exists()?snapshots[i].data():null;
    if(op.remove){if(remote&&!equalValue(op.base,remote))throw Error('Entry changed on another device; deletion not applied.');if(remote)tx.delete(refs[i]);}
    else {const next=reconcileRecord(op.base,op.value,remote);if(!equalValue(next,remote))tx.set(refs[i],next);}
   }
  });
- const b=fs.writeBatch(db);
- for(let i=0;i<ops.length;i++){const op=ops[i],ref=refs[i];if(op.remove)b.delete(ref);else if(!op.base)b.set(ref,op.value);else{const patch={};for(const key of new Set([...Object.keys(op.base),...Object.keys(op.value)]))if(!equalValue(op.base[key],op.value[key]))patch[key]=Object.hasOwn(op.value,key)?op.value[key]:fs.deleteField();if(Object.keys(patch).length)b.update(ref,patch)}}
- return b.commit()}};
+ }};
 }
