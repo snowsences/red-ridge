@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {scaleIngredientAmount,odometerHistory,snoozedTodoDate} from '../core.mjs';
+test('scale quantities without altering free text',()=>{for(const [value,factor,expected] of [["1 1/2 cups",2,"3 cups"],["½ tsp",0.5,"1/4 tsp"],["2–3 tbsp",2,"4–6 tbsp"],["to taste",2,"to taste"],["250g",0.5,"125g"],["1/0 tsp",2,"1/0 tsp"]])assert.equal(scaleIngredientAmount(value,factor),expected)});
+test('snooze crosses calendar year',()=>assert.equal(snoozedTodoDate('week','2026-12-28'),'2027-01-04'));
+test('odometer combines manual and maintenance readings',()=>assert.equal(odometerHistory({id:'c',unit:'mi',odometerReadings:[{id:'r',date:'2026-01-01',value:10,unit:'mi'}]},[{id:'m',carId:'c',type:'maintenance',date:'2026-02-01',mileage:'20'}]).length,2));

@@ -131,3 +131,26 @@ export function validateRecordLimits(r){
  for(const [key,min,max] of [['order',-1000000,1000000],['intervalMonths',1,12]])if(key in r&&(!Number.isFinite(r[key])||r[key]<min||r[key]>max))throw Error('Invalid '+key+' in '+r.title);
  return r;
 }
+
+const fractionChars={'¼':.25,'½':.5,'¾':.75,'⅓':1/3,'⅔':2/3,'⅛':.125,'⅜':.375,'⅝':.625,'⅞':.875,'⅕':.2,'⅖':.4,'⅗':.6,'⅘':.8,'⅙':1/6,'⅚':5/6};
+const quantityPattern=String.raw`(?:\d+\s+\d+\s*\/\s*\d+|\d+\s*\/\s*\d+|\d+(?:\.\d+)?\s*[¼½¾⅓⅔⅛⅜⅝⅞⅕⅖⅗⅘⅙⅚]|[¼½¾⅓⅔⅛⅜⅝⅞⅕⅖⅗⅘⅙⅚]|\d+(?:\.\d+)?|\.\d+)`;
+function readQuantity(s){s=s.trim();const ch=s.at(-1);if(ch in fractionChars)return (Number(s.slice(0,-1).trim())||0)+fractionChars[ch];if(s.includes('/')){const m=/^(?:(\d+)\s+)?(\d+)\s*\/\s*(\d+)$/.exec(s);return m&&Number(m[3])?Number(m[1]||0)+Number(m[2])/Number(m[3]):NaN;}return Number(s)}
+function formatQuantity(n){const whole=Math.floor(n+1e-9),rest=n-whole;for(const den of [2,3,4,8,5,6,16]){const top=Math.round(rest*den);if(top>0&&top<den&&Math.abs(rest-top/den)<1e-7)return (whole?whole+' ':'')+top+'/'+den}return String(Math.round(n*1000)/1000)}
+export function scaleIngredientAmount(value,factor){
+ const original=String(value??'');if(!Number.isFinite(factor)||factor<=0||factor===1)return original;
+ const re=new RegExp('^(\\s*)('+quantityPattern+')(?:([ \\t]*(?:[-–—]|to)[ \\t]*)('+quantityPattern+'))?(.*)$','i'),m=re.exec(original);
+ if(!m||/^\s*\//.test(m[5])||/^\s*\d/.test(m[5]))return original;
+ const a=readQuantity(m[2]),b=m[4]?readQuantity(m[4]):null;if(!Number.isFinite(a)||b!==null&&!Number.isFinite(b))return original;
+ return m[1]+formatQuantity(a*factor)+(b!==null?m[3]+formatQuantity(b*factor):'')+m[5];
+}
+export function odometerHistory(car,logs=[]){
+ const unit=car.unit==='km'?'km':'mi',convert=(n,u)=>u&&u!==unit?(unit==='km'?n*1.609344:n/1.609344):n;
+ const rows=[...(Array.isArray(car.odometerReadings)?car.odometerReadings:[]).map(r=>({...r,source:'manual'})),...logs.filter(r=>r.type==='maintenance'&&!r.deleted&&r.carId===car.id&&r.mileage!==''&&r.mileage!=null).map(r=>({id:r.id,date:r.date,value:r.mileage,unit:r.mileageUnit||unit,source:'maintenance',title:r.title}))];
+ return rows.filter(r=>validTodoDate(r.date)&&String(r.value??'').trim()&&Number.isFinite(Number(r.value))&&Number(r.value)>=0).map(r=>({...r,normalized:convert(Number(r.value),r.unit),unit:r.unit||unit})).sort((a,b)=>a.date.localeCompare(b.date)||a.normalized-b.normalized||String(a.id).localeCompare(String(b.id)));
+}
+export function snoozedTodoDate(choice,today=localDate()){
+ if(choice==='tomorrow')return shiftDate(today,1);
+ if(choice==='week')return shiftDate(today,7);
+ if(validTodoDate(choice)&&choice>today)return choice;
+ throw Error('Choose a future date.');
+}
