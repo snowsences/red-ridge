@@ -9,7 +9,7 @@ const validCloudinaryPhoto=photo=>typeof photo==='string'||!!photo&&typeof photo
 function validHubRecord(r){
  if(!r.noteKind)return true;
  if(!noteHubIds[r.noteKind]||r.id!==noteHubIds[r.noteKind])return false;
- const arrays=r.noteKind==='homeManual'?['homeItems','homeHistory','homeContacts']:r.noteKind==='packing'?['packingPacks','packingTrips']:['photoGuides'];
+ const arrays=r.noteKind==='homeManual'?['homeItems','homeHistory','homeContacts']:r.noteKind==='packing'?(Array.isArray(r.packingItems)?['packingItems']:Array.isArray(r.packingTemplate)?['packingTemplate']:['packingPacks','packingTrips']):['photoGuides'];
  if(arrays.some(key=>!Array.isArray(r[key])||r[key].length>1000))return false;
  const nested=[...(r.homeItems||[]),...(r.photoGuides||[])];
  return nested.every(item=>item&&typeof item.id==='string'&&/^[-\w]{1,100}$/.test(item.id)&&typeof item.title==='string'&&item.title.length<=1000&&(!item.photos||Array.isArray(item.photos)&&item.photos.length<=100&&item.photos.every(validCloudinaryPhoto)));
@@ -21,13 +21,14 @@ export function validateBackup(data){
   for(const r of data.records){
     if(!r||typeof r.id!=='string'||!/^[-\w]{1,100}$/.test(r.id)||ids.has(r.id)||!types.includes(r.type))throw Error('Invalid or duplicate entry in backup.');
     ids.add(r.id);
+    validateRecordLimits(r);
     if(r.type==='todoSchedule'&&!validSchedule(r))throw Error('Invalid recurring reminder.');
-    if(r.type==='recipe'&&r.recipeIngredients&&(!Array.isArray(r.recipeIngredients)||r.recipeIngredients.length>500||r.recipeIngredients.some(item=>!item||typeof item.id!=='string'||!/^[-\w]{1,100}$/.test(item.id)||typeof item.ingredientId!=='string'||!/^[-\w]{1,100}$/.test(item.ingredientId)||typeof item.amount!=='string'||item.amount.length>100||typeof item.notes!=='string'||item.notes.length>300)))throw Error('Invalid recipe ingredients.');
+    if(r.type==='recipe'&&r.recipeIngredients&&(!Array.isArray(r.recipeIngredients)||r.recipeIngredients.length>200||r.recipeIngredients.some(item=>!item||typeof item.id!=='string'||!/^[-\w]{1,100}$/.test(item.id)||typeof item.ingredientId!=='string'||!/^[-\w]{1,100}$/.test(item.ingredientId)||typeof item.amount!=='string'||item.amount.length>100||typeof item.notes!=='string'||item.notes.length>300)))throw Error('Invalid recipe ingredients.');
     if(r.type==='ingredient'&&((r.tagIds&&!Array.isArray(r.tagIds))||(r.aliases&&!Array.isArray(r.aliases))||(r.tagIds?.some(id=>typeof id!=='string'||!/^[-\w]{1,100}$/.test(id)))||(r.aliases?.some(alias=>typeof alias!=='string'||alias.length>200))||typeof r.hidden!=='undefined'&&typeof r.hidden!=='boolean'||typeof r.substitutes!=='undefined'&&typeof r.substitutes!=='string'))throw Error('Invalid ingredient.');
     if(r.scheduleId&&(r.type!=='todo'||typeof r.scheduleId!=='string'||!/^[-\w]{1,70}$/.test(r.scheduleId)||!validTodoDate(r.scheduledDate)||r.id!==`repeat_${r.scheduleId}_${r.scheduledDate}`))throw Error('Invalid recurring To-Do.');
     if(JSON.stringify(r).length>(r.type==='note'&&r.noteKind?900000:100000)||typeof r.title!=='string'||r.type==='note'&&!validHubRecord(r))throw Error('Invalid entry content.');
     if(r.photos&&!Array.isArray(r.photos))throw Error('Invalid photos.');
-    for(const photo of r.photos||[]){
+    for(const photo of photoContainers(r).flatMap(x=>x.photos)){
       if(typeof photo==='string')continue;
       if(!validCloudinaryPhoto(photo))throw Error('Invalid Cloudinary photo reference.');
     }
@@ -40,8 +41,9 @@ export function validateBackup(data){
   // Ids are unique by now, so one lookup table keeps the reference checks linear.
   const typeById=new Map(data.records.map(r=>[r.id,r.type])),is=(id,type)=>typeById.get(id)===type;
   for(const r of data.records){
+    if(r.deleted)continue;
     if(r.scheduleId&&!is(r.scheduleId,'todoSchedule'))throw Error('A recurring reminder is missing from this backup.');
-    if(r.photos?.some(photo=>typeof photo==='string'&&!pids.has(photo)))throw Error('A legacy photo is missing from this backup.');
+    if(legacyPhotoIds(r).some(photo=>!pids.has(photo)))throw Error('A legacy photo is missing from this backup.');
     if(['maintenance','reminder'].includes(r.type)&&!is(r.carId,'car'))throw Error('A vehicle is missing from this backup.');
     if(r.type==='recipe'&&r.recipeIngredients?.some(item=>!is(item.ingredientId,'ingredient')))throw Error('A recipe ingredient is missing from this backup.');
     if(r.type==='ingredient'&&r.tagIds?.some(tagId=>!is(tagId,'ingredientTag')))throw Error('An ingredient tag is missing from this backup.');
@@ -90,4 +92,42 @@ export function recurringTodos(records,asOf=localDate()){
   }
  }
  return result;
+}
+
+export function equalValue(a,b){
+ if(a===b)return true;
+ if(!a||!b||typeof a!=='object'||typeof b!=='object'||Array.isArray(a)!==Array.isArray(b))return false;
+ const keys=Object.keys(a);return keys.length===Object.keys(b).length&&keys.every(k=>Object.hasOwn(b,k)&&equalValue(a[k],b[k]));
+}
+export function reconcileRecord(base,next,remote){
+ if(!base){if(!remote||equalValue(next,remote))return next;throw Error('This entry already exists on another device. Review the saved entry.')}
+ if(!remote)throw Error('This entry was removed on another device. Your edit is retained for recovery.');
+ const result={...remote};
+ for(const key of new Set([...Object.keys(base),...Object.keys(next)])){
+  if(equalValue(base[key],next[key]))continue;
+  if(key==='updatedAt'){result[key]=String(remote[key]||'')>String(next[key]||'')?remote[key]:next[key];continue}
+  if(!equalValue(remote[key],base[key])&&!equalValue(remote[key],next[key]))throw Error('Another device changed '+key+'. Your edit is retained for recovery.');
+  if(Object.hasOwn(next,key))result[key]=next[key];else delete result[key];
+ }
+ return result;
+}
+export function splitOperations(ops,maxCount=200,maxBytes=4000000){
+ const chunks=[];let chunk=[],size=0;for(const op of ops){const n=JSON.stringify(op.value||{}).length*3+512;if(n>maxBytes)throw Error('An entry exceeds the supported write size.');if(chunk.length&&(chunk.length>=maxCount||size+n>maxBytes)){chunks.push(chunk);chunk=[];size=0}chunk.push(op);size+=n}if(chunk.length)chunks.push(chunk);return chunks;
+}
+export function photoContainers(record){return [record,...(record.homeItems||[]),...(record.photoGuides||[])].filter(x=>Array.isArray(x?.photos))}
+export function legacyPhotoIds(record){return photoContainers(record).flatMap(x=>x.photos.filter(p=>typeof p==='string'))}
+export function stablePackingId(noteId,index){return 'packing_'+noteId+'_'+index}
+export function completeReminderRecords(reminder,stamp,date){
+ const id='maintenance_'+reminder.id;
+ return [{id,value:{...reminder,id,type:'maintenance',date,scheduledDate:reminder.scheduledDate||reminder.date||'',completedDate:date,done:true,completedAt:stamp,updatedAt:stamp,sourceReminderId:reminder.id}},
+ {id:reminder.id,value:{...reminder,done:true,deleted:true,deletedAt:stamp,updatedAt:stamp}}];
+}
+export function validateRecordLimits(r){
+ const strings={title:300,body:20000,ingredients:20000,method:20000,substitutes:10000,category:100,year:10,make:100,model:200,owner:200,status:20,odometer:30,unit:10,vin:100,mileage:30,cost:30,provider:200,carId:128,scheduleId:128,coverPhotoId:500,date:10,ownedFrom:10,ownedTo:10,startDate:10,scheduledDate:10,cancelledOn:10,createdAt:40,updatedAt:40};
+ if(typeof r.title!=='string'||!r.title.trim()||typeof r.createdAt!=='string'||typeof r.updatedAt!=='string'||Object.keys(r).length>40)throw Error('Invalid entry: '+(r.title||r.id));
+ for(const [key,max] of Object.entries(strings))if(key in r&&(typeof r[key]!=='string'||r[key].length>max))throw Error('Invalid '+key+' in '+r.title);
+ for(const [key,max] of Object.entries({photos:100,recipeIngredients:200,aliases:100,tagIds:100}))if(key in r&&(!Array.isArray(r[key])||r[key].length>max))throw Error('Too many or invalid '+key+' in '+r.title);
+ for(const key of ['deleted','richText','pinned','hidden','done'])if(key in r&&typeof r[key]!=='boolean')throw Error('Invalid '+key+' in '+r.title);
+ for(const [key,min,max] of [['order',-1000000,1000000],['intervalMonths',1,12]])if(key in r&&(!Number.isFinite(r[key])||r[key]<min||r[key]>max))throw Error('Invalid '+key+' in '+r.title);
+ return r;
 }
