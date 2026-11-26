@@ -1,6 +1,6 @@
 import {initializeApp} from './vendor/firebase-app.js';
 import {getAuth,setPersistence,browserLocalPersistence,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from './vendor/firebase-auth.js';
-import {OWNER,reconcileRecord,equalValue} from './core.mjs?v=98-experience';
+import {OWNER,reconcileRecord,equalValue} from './core.mjs?v=99-experience';
 // Firestore is the largest bundle; signed-out visitors never need it. A saved session starts the download
 // alongside Auth so returning users are not slowed down by loading the two one after the other.
 let firestoreModule=null;const loadFirestore=()=>firestoreModule||=import('./vendor/firebase-firestore.js');

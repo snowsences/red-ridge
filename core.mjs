@@ -146,7 +146,7 @@ export function scaleIngredientAmount(value,factor){
 export function odometerHistory(car,logs=[]){
  const unit=car.unit==='km'?'km':'mi',convert=(n,u)=>u&&u!==unit?(unit==='km'?n*1.609344:n/1.609344):n;
  const rows=[...(Array.isArray(car.odometerReadings)?car.odometerReadings:[]).map(r=>({...r,source:'manual'})),...logs.filter(r=>r.type==='maintenance'&&!r.deleted&&r.carId===car.id&&r.mileage!==''&&r.mileage!=null).map(r=>({id:r.id,date:r.date,value:r.mileage,unit:r.mileageUnit||unit,source:'maintenance',title:r.title}))];
- return rows.filter(r=>validTodoDate(r.date)&&String(r.value??'').trim()&&Number.isFinite(Number(r.value))&&Number(r.value)>=0).map(r=>({...r,normalized:convert(Number(r.value),r.unit),unit:r.unit||unit})).sort((a,b)=>a.date.localeCompare(b.date)||a.normalized-b.normalized||String(a.id).localeCompare(String(b.id)));
+ return rows.filter(r=>typeof r.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&Number.isFinite(Date.parse(r.date))&&String(r.value??'').trim()&&Number.isFinite(Number(r.value))&&Number(r.value)>=0).map(r=>({...r,normalized:convert(Number(r.value),r.unit),unit:r.unit||unit})).sort((a,b)=>a.date.localeCompare(b.date)||a.normalized-b.normalized||String(a.id).localeCompare(String(b.id)));
 }
 export function snoozedTodoDate(choice,today=localDate()){
  if(choice==='tomorrow')return shiftDate(today,1);
